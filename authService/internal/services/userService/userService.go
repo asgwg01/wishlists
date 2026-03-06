@@ -8,8 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"pkg/types/trace"
 	"time"
+
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"

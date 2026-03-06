@@ -22,7 +22,7 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Addres  string        `yaml:"addres" env-default:"localhost" env:"API_GATEWAY_HTTP_ADRESS"`
+	Addres  string        `yaml:"addres" env-default:"localhost"`
 	Port    string        `yaml:"port" env-default:"8095" env:"API_GATEWAY_HTTP_PORT"`
 	Timeout time.Duration `yaml:"timeout" env-default:"10s" env:"API_GATEWAY_HTTP_TIMEOUT"`
 }

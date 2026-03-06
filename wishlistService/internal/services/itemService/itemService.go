@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"pkg/types/price"
-	"pkg/types/trace"
 	"wishlistService/internal/domain/models"
 	"wishlistService/internal/domain/types"
 	"wishlistService/internal/grpc/client"
 	"wishlistService/internal/producer"
 	"wishlistService/internal/storage"
+
+	"github.com/asgwg01/wishlists/pkg/types/price"
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"github.com/google/uuid"
 )

@@ -13,7 +13,8 @@ storage:
   password: "0000"
 
 kafka:
-  broker: "localhost:9092"
+  broker_url: "localhost"
+  broker_port: "9092"
   topic: "wishlist_events"
 
 logbull:

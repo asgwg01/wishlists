@@ -4,7 +4,8 @@ import (
 	userservice "authService/internal/services/userService"
 	"context"
 	"errors"
-	authv1 "pkg/proto/auth/v1"
+
+	authv1 "github.com/asgwg01/wishlists/pkg/proto/auth/v1"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -167,6 +168,7 @@ func validateRegisterRequest(req *authv1.RegisterRequest) error {
 	}
 
 	return nil
+	
 }
 
 func validateLoginRequest(req *authv1.LoginRequest) error {

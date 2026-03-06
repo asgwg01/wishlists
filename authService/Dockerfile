@@ -5,6 +5,7 @@ WORKDIR /appAuthService
 COPY . .
 
 RUN go mod tidy
-RUN make wishlist-authService-build
 
-CMD [ "make", "wishlist-authService-start"]
+RUN go build -o .bin/authService cmd/authService/main.go
+
+CMD [ ".bin/authService"]

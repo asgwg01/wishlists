@@ -3,11 +3,12 @@ package handler
 import (
 	"context"
 	"errors"
-	wishlistv1 "pkg/proto/wishlists/v1"
-	"pkg/types/price"
 	"wishlistService/internal/domain/types"
 	itemservice "wishlistService/internal/services/itemService"
 	"wishlistService/internal/services/wishlistService"
+
+	wishlistv1 "github.com/asgwg01/wishlists/pkg/proto/wishlists/v1"
+	"github.com/asgwg01/wishlists/pkg/types/price"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"

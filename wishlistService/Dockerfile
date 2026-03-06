@@ -5,6 +5,7 @@ WORKDIR /appWishlistService
 COPY . .
 
 RUN go mod tidy
-RUN make wishlist-wishlistService-build
 
-CMD [ "make", "wishlist-wishlistService-start"]
+RUN go build -o .bin/wishlistService cmd/wishlistService/main.go
+
+CMD [ ".bin/wishlistService"]

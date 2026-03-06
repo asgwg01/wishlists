@@ -3,9 +3,10 @@ package client
 import (
 	"context"
 	"fmt"
-	authv1 "pkg/proto/auth/v1"
-	"pkg/types/trace"
 	"time"
+
+	authv1 "github.com/asgwg01/wishlists/pkg/proto/auth/v1"
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

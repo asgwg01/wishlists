@@ -34,8 +34,9 @@ type StorageConfig struct {
 }
 
 type KafkaConfig struct {
-	Broker string `yaml:"broker" nv-required:"true" env:"KAFKA_BROKER"`
-	Topic  string `yaml:"topic" nv-required:"true" env:"KAFKA_TOPIC_WISHLIST_EVENTS"`
+	BrokerUrl  string `yaml:"broker_url" nv-required:"true" env:"KAFKA_BROKER_URL"`
+	BrokerPort string `yaml:"broker_port" nv-required:"true" env:"KAFKA_BROKER_PORT"`
+	Topic      string `yaml:"topic" nv-required:"true" env:"KAFKA_TOPIC_WISHLIST_EVENTS"`
 }
 
 type LogBullConfig struct {

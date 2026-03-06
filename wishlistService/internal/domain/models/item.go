@@ -1,9 +1,10 @@
 package models
 
 import (
-	"pkg/types/price"
 	"time"
 	"wishlistService/internal/domain/types"
+
+	"github.com/asgwg01/wishlists/pkg/types/price"
 
 	"github.com/google/uuid"
 )

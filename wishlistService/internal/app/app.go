@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	wishlistv1 "pkg/proto/wishlists/v1"
 	"wishlistService/internal/config"
 	"wishlistService/internal/grpc/client"
 	"wishlistService/internal/grpc/handler"
@@ -13,6 +12,8 @@ import (
 	itemservice "wishlistService/internal/services/itemService"
 	"wishlistService/internal/services/wishlistService"
 	"wishlistService/internal/storage/postgres"
+
+	wishlistv1 "github.com/asgwg01/wishlists/pkg/proto/wishlists/v1"
 
 	"google.golang.org/grpc"
 )
@@ -50,7 +51,7 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	// Создаем Kafka producer
 	kafkaProducer := producer.NewKafkaProducer(
 		log,
-		cfg.KafkaConfig.Broker,
+		cfg.KafkaConfig.BrokerUrl+":"+cfg.KafkaConfig.BrokerPort,
 		cfg.KafkaConfig.Topic,
 	)
 	application.kafkaPronucer = kafkaProducer

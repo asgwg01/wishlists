@@ -2,13 +2,14 @@ package client
 
 import (
 	"context"
-	wishlistv1 "pkg/proto/wishlists/v1"
-	"pkg/types/trace"
+	"gateway/internal/grpc/utils"
 	"time"
+
+	wishlistv1 "github.com/asgwg01/wishlists/pkg/proto/wishlists/v1"
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	//"google.golang.org/grpc/metadata"
 )
 
 type WishlistClient struct {
@@ -36,57 +37,70 @@ func NewWishlistClient(addr string, port string) (*WishlistClient, error) {
 	}, nil
 }
 
-// addUserToContext добавляет информацию о пользователе в metadata
-// func (c *WishlistClient) addUserToContext(ctx context.Context, userID, userEmail, userName string) context.Context {
-// 	md := metadata.Pairs(
-// 		"user-id", userID,
-// 		"user-email", userEmail,
-// 		"user-name", userName,
-// 	)
-// 	return metadata.NewOutgoingContext(ctx, md)
-// }
-
 // Wishlist methods
 func (c *WishlistClient) CreateWishlist(ctx context.Context, userID, userEmail, userName, title, description string, isPublic bool) (*wishlistv1.WishlistResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 
-	//ctx = c.addUserToContext(ctx, userID, userEmail, userName)
-	return c.client.CreateWishlist(ctx, &wishlistv1.CreateWishlistRequest{
+	responce, err := c.client.CreateWishlist(ctx, &wishlistv1.CreateWishlistRequest{
 		UserId:      userID,
 		Title:       title,
 		Description: description,
 		IsPublic:    isPublic,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) GetWishlist(ctx context.Context, userID, wishlistID string) (*wishlistv1.WishlistResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 
-	return c.client.GetWishlist(ctx, &wishlistv1.GetWishlistRequest{
+	responce, err := c.client.GetWishlist(ctx, &wishlistv1.GetWishlistRequest{
 		Id:     wishlistID,
 		UserId: userID,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) GetUserWishlists(ctx context.Context, userID, requestingUserID string) (*wishlistv1.WishlistListResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 
-	return c.client.GetUserWishlists(ctx, &wishlistv1.GetUserWishlistsRequest{
+	responce, err := c.client.GetUserWishlists(ctx, &wishlistv1.GetUserWishlistsRequest{
 		UserId:           userID,
 		RequestingUserId: requestingUserID,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) UpdateWishlist(ctx context.Context, userID, wishlistID, title, description string, isPublic bool) (*wishlistv1.WishlistResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 
-	return c.client.UpdateWishlist(ctx, &wishlistv1.UpdateWishlistRequest{
+	responce, err := c.client.UpdateWishlist(ctx, &wishlistv1.UpdateWishlistRequest{
 		Id:          wishlistID,
 		UserId:      userID,
 		Title:       title,
 		Description: description,
 		IsPublic:    isPublic,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) DeleteWishlist(ctx context.Context, userID, wishlistID string) error {
@@ -96,23 +110,29 @@ func (c *WishlistClient) DeleteWishlist(ctx context.Context, userID, wishlistID 
 		Id:     wishlistID,
 		UserId: userID,
 	})
-	return err
+	return utils.GrpcToDomainError(err)
 }
 
 func (c *WishlistClient) ListPublicWishlists(ctx context.Context, page, pageSize int32) (*wishlistv1.WishlistListResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 
-	return c.client.ListPublicWishlists(ctx, &wishlistv1.ListPublicWishlistsRequest{
+	responce, err := c.client.ListPublicWishlists(ctx, &wishlistv1.ListPublicWishlistsRequest{
 		Page:     page,
 		PageSize: pageSize,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 // Item methods
 func (c *WishlistClient) AddItem(ctx context.Context, userID, userEmail, userName, wishlistID, name, description, imageURL, productURL string, price int64) (*wishlistv1.ItemResponce, error) {
-	//ctx = c.addUserToContext(ctx, userID, userEmail, userName)
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.AddItem(ctx, &wishlistv1.AddItemRequest{
+
+	responce, err := c.client.AddItem(ctx, &wishlistv1.AddItemRequest{
 		WishlistId:  wishlistID,
 		UserId:      userID,
 		Name:        name,
@@ -121,30 +141,47 @@ func (c *WishlistClient) AddItem(ctx context.Context, userID, userEmail, userNam
 		ProductUrl:  productURL,
 		Price:       price,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) GetItem(ctx context.Context, userID, itemID string) (*wishlistv1.ItemResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.GetItem(ctx, &wishlistv1.GetItemRequest{
+	responce, err := c.client.GetItem(ctx, &wishlistv1.GetItemRequest{
 		Id:     itemID,
 		UserId: userID,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) ListItems(ctx context.Context, userID, wishlistID string, page, pageSize int32) (*wishlistv1.ItemListResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.ListItems(ctx, &wishlistv1.ListItemsRequest{
+	responce, err := c.client.ListItems(ctx, &wishlistv1.ListItemsRequest{
 		WishlistId: wishlistID,
 		UserId:     userID,
 		Page:       page,
 		PageSize:   pageSize,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) UpdateItem(ctx context.Context, userID, userEmail, userName, itemID, name, description, imageURL, productURL string, price int64) (*wishlistv1.ItemResponce, error) {
-	//ctx = c.addUserToContext(ctx, userID, userEmail, userName)
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.UpdateItem(ctx, &wishlistv1.UpdateItemRequest{
+	responce, err := c.client.UpdateItem(ctx, &wishlistv1.UpdateItemRequest{
 		Id:          itemID,
 		UserId:      userID,
 		Name:        name,
@@ -153,6 +190,12 @@ func (c *WishlistClient) UpdateItem(ctx context.Context, userID, userEmail, user
 		ProductUrl:  productURL,
 		Price:       price,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) DeleteItem(ctx context.Context, userID, itemID string) error {
@@ -161,33 +204,50 @@ func (c *WishlistClient) DeleteItem(ctx context.Context, userID, itemID string) 
 		Id:     itemID,
 		UserId: userID,
 	})
-	return err
+
+	return utils.GrpcToDomainError(err)
 }
 
 // Booking methods
 func (c *WishlistClient) BookItem(ctx context.Context, userID, userEmail, userName, itemID string) (*wishlistv1.ItemResponce, error) {
-	//ctx = c.addUserToContext(ctx, userID, userEmail, userName)
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.BookItem(ctx, &wishlistv1.BookItemRequest{
+	responce, err := c.client.BookItem(ctx, &wishlistv1.BookItemRequest{
 		ItemId: itemID,
 		UserId: userID,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) UnbookItem(ctx context.Context, userID, userEmail, userName, itemID string) (*wishlistv1.ItemResponce, error) {
-	//ctx = c.addUserToContext(ctx, userID, userEmail, userName)
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.UnbookItem(ctx, &wishlistv1.UnbookItemRequest{
+	responce, err := c.client.UnbookItem(ctx, &wishlistv1.UnbookItemRequest{
 		ItemId: itemID,
 		UserId: userID,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) GetUserBookings(ctx context.Context, userID string) (*wishlistv1.BookingListResponce, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
-	return c.client.GetBookings(ctx, &wishlistv1.GetBookingsRequest{
+	responce, err := c.client.GetBookings(ctx, &wishlistv1.GetBookingsRequest{
 		UserId: userID,
 	})
+
+	if err != nil {
+		return nil, utils.GrpcToDomainError(err)
+	}
+
+	return responce, nil
 }
 
 func (c *WishlistClient) Close() error {

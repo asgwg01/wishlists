@@ -11,7 +11,8 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	authv1 "pkg/proto/auth/v1"
+
+	authv1 "github.com/asgwg01/wishlists/pkg/proto/auth/v1"
 
 	"google.golang.org/grpc"
 )

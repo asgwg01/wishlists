@@ -7,8 +7,9 @@ import (
 	"gateway/internal/http/middleware"
 	"log/slog"
 	"net/http"
-	"pkg/types/trace"
 	"strconv"
+
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"github.com/gorilla/mux"
 )

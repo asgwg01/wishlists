@@ -3,9 +3,11 @@ package client
 import (
 	"context"
 	"fmt"
-	authv1 "pkg/proto/auth/v1"
-	"pkg/types/trace"
+	"gateway/internal/grpc/utils"
 	"time"
+
+	authv1 "github.com/asgwg01/wishlists/pkg/proto/auth/v1"
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -84,7 +86,7 @@ func (c *AuthClient) Register(ctx context.Context, email, password, name string)
 		Name:     name,
 	})
 	if err != nil {
-		return nil, "", err
+		return nil, "", utils.GrpcToDomainError(err)
 	}
 
 	return &UserInfo{
@@ -102,7 +104,7 @@ func (c *AuthClient) Login(ctx context.Context, email, password string) (*UserIn
 		Password: password,
 	})
 	if err != nil {
-		return nil, "", err
+		return nil, "", utils.GrpcToDomainError(err)
 	}
 
 	return &UserInfo{
@@ -115,20 +117,12 @@ func (c *AuthClient) Login(ctx context.Context, email, password string) (*UserIn
 // GetUserInfo получает информацию о пользователе по ID
 func (c *AuthClient) GetUserInfo(ctx context.Context, userID string) (*UserInfo, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
-	
+
 	resp, err := c.client.GetUserInfo(ctx, &authv1.UserInfoRequest{
 		UserId: userID,
 	})
 	if err != nil {
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.NotFound:
-				return nil, fmt.Errorf("user %s not found", userID)
-			case codes.InvalidArgument:
-				return nil, fmt.Errorf("invalid user id: %s", userID)
-			}
-		}
-		return nil, fmt.Errorf("failed to get user info: %w", err)
+		return nil, utils.GrpcToDomainError(err)
 	}
 
 	return &UserInfo{

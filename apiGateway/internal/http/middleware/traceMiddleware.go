@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	"pkg/types/trace"
+
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 )
 
 func TraceMiddleware() func(http.Handler) http.Handler {

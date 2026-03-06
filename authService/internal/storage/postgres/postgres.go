@@ -10,7 +10,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"pkg/types/trace"
+
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
@@ -115,7 +116,7 @@ func (s *Storage) CreateUser(ctx context.Context, user models.User) (models.User
 			return models.User{}, fmt.Errorf("error commit transaction %s", err)
 		}
 
-		log.Info("Creare parsing success!", utils.UserToSlog(user))
+		log.Info("Creare user success!", utils.UserToSlog(user))
 
 		user.ID = newUuid
 	} // end transaction

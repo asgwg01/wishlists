@@ -7,11 +7,12 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"pkg/logger"
 	"syscall"
 	"time"
 	"wishlistService/internal/app"
 	"wishlistService/internal/config"
+
+	"github.com/asgwg01/wishlists/pkg/logger"
 
 	"github.com/logbull/logbull-go/logbull"
 )

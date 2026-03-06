@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	"pkg/types/trace"
 	"strconv"
 	"time"
+
+	"github.com/asgwg01/wishlists/pkg/types/trace"
 
 	"github.com/segmentio/kafka-go"
 )
