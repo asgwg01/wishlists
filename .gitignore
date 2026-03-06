@@ -1,0 +1,7 @@
+.bin/
+.volumes/
+.tmp/
+.vscode/
+go.work
+go.work.sum
+*.log

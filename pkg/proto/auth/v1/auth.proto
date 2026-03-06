@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "wishlistApp/pkg/proto/auth/v1;authv1";
+
+// AuthService предоставляет методы для аутентификации
+service AuthService {
+    // Регистрация нового пользователя
+    rpc Register(RegisterRequest) returns (AuthResponse);
+    // Вход
+    rpc Login(LoginRequest) returns (AuthResponse);
+    // Выход
+    rpc Logout(LogoutRequest) returns (LogoutResponce);
+    // Валидация / чек корректности токена
+    rpc Validate(ValidateRequest) returns (UserInfoResponce);
+    // обновление токена
+    rpc Refresh(RefreshRequest) returns (AuthResponse);
+    // инфо о пользователе
+    rpc GetUserInfo(UserInfoRequest) returns (UserInfoResponce);
+
+}
+
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string name = 3;
+}
+
+message AuthResponse {
+    string token = 1;
+    string refresh_token = 2;
+    string user_id = 3;
+    int64 expires_at = 4;  // Unix timestamp
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LogoutRequest {
+    string user_id = 1;
+    string token = 2;
+}
+
+message LogoutResponce {
+    bool sucess = 1;
+}
+
+message ValidateRequest {
+    string token = 1;
+}
+
+message UserInfoRequest {
+    string user_id = 1;
+}
+
+message UserInfoResponce {
+    string user_id = 1;
+    string email = 2;
+    string name = 3;
+}
+
+message RefreshRequest {
+    string refresh_token = 1;
+}

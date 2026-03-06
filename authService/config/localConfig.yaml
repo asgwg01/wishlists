@@ -1,0 +1,26 @@
+env: "local" # local, dev, env
+
+grpc:
+  port: "50051"
+
+storage:
+  host: "localhost"
+  port: "5432"
+  db: "postgres"
+  user: "postgres"
+  password: "0000"
+
+redis:
+  host: "localhost"
+  port: "6379"
+  password: ""
+
+jwt:
+  secret: "123456"
+  ttl: "1h"
+  refresh_ttl: "24h"
+
+logbull:
+  url: "localhost"
+  port: "4005"
+  project_id: ""

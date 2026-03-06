@@ -1,0 +1,43 @@
+env: "local" # local, dev, env
+
+http:
+  addres: "0.0.0.0"
+  port: "8095"
+  timeout: 4s
+
+grpc:
+  auth_service_addr: "localhost"
+  auth_service_port: "50051"
+  wishlist_service_addr: "localhost"
+  wishlist_service_port: "50052"
+
+jwt:
+  secret: "123456"
+
+cors:
+  origins:
+    - "localhost:8095"
+  metods: 
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+  headers:
+    - "Content-Type"
+    - "Authorization"
+    - "X-Trace-ID"
+  credentials: true
+
+rate_limits:
+  limit: 100
+  duration: 60s
+
+swagger:
+  run_swagger_ui: true
+  swagger_url: "/swagger/"
+
+logbull:
+  url: "localhost"
+  port: "4005"
+  project_id: ""
+

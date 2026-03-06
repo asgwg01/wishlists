@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package wishlist.v1;
+
+option go_package = "wishlistApp/pkg/proto/wishlists/v1;wishlistv1";
+
+import "google/protobuf/empty.proto";
+
+service WishlistService {
+    // Вишлисты
+    rpc CreateWishlist(CreateWishlistRequest) returns (WishlistResponce);
+    rpc GetWishlist(GetWishlistRequest) returns (WishlistResponce);
+    rpc GetUserWishlists(GetUserWishlistsRequest) returns (WishlistListResponce);
+    rpc UpdateWishlist(UpdateWishlistRequest) returns (WishlistResponce);
+    rpc DeleteWishlist(DeleteWishlistRequest) returns (google.protobuf.Empty);
+    rpc ListPublicWishlists(ListPublicWishlistsRequest) returns (WishlistListResponce);
+    
+    // Товары
+    rpc AddItem(AddItemRequest) returns (ItemResponce);
+    rpc GetItem(GetItemRequest) returns (ItemResponce);
+    rpc UpdateItem(UpdateItemRequest) returns (ItemResponce);
+    rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty);
+    rpc ListItems(ListItemsRequest) returns (ItemListResponce);
+    
+    // бронь
+    rpc BookItem(BookItemRequest) returns (ItemResponce);
+    rpc UnbookItem(UnbookItemRequest) returns (ItemResponce);
+    rpc GetBookings(GetBookingsRequest) returns (BookingListResponce);
+}
+
+// Wishlist messages
+message WishlistResponce {
+    string id = 1;
+    string owner_id = 2;
+    string title = 3;
+    string description = 4;
+    bool is_public = 5;
+    int64 created_at = 6;  // Unix timestamp
+    int64 updated_at = 7;  // Unix timestamp
+}
+
+message CreateWishlistRequest {
+    string user_id = 1;
+    string title = 2;
+    string description = 3;
+    bool is_public = 4;
+}
+
+message GetWishlistRequest {
+    string id = 1;
+    string user_id = 2;
+}
+
+message GetUserWishlistsRequest {
+    string user_id = 1;            // Чьи вишлисты смотрим
+    string requesting_user_id = 2; // Кто запрашивает (для приватных)
+}
+
+message UpdateWishlistRequest {
+    string id = 1;
+    string user_id = 2;  // Кто обновляет
+    string title = 3;
+    string description = 4;
+    bool is_public = 5;
+}
+
+message DeleteWishlistRequest {
+    string id = 1;
+    string user_id = 2; // Кто удаляет
+}
+
+message ListPublicWishlistsRequest {
+    int32 page = 1; 
+    int32 page_size = 2;
+}
+
+message WishlistListResponce {
+    repeated WishlistResponce wishlists = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
+    int32 current_page = 4;
+}
+
+// Item messages
+message ItemResponce {
+    string id = 1;
+    string wishlist_id = 2;
+    string name = 3;
+    string description = 4;
+    string image_url = 5;
+    string product_url = 6;
+    int64 price = 7;                // копейки
+    optional string booked_by = 8;
+    optional int64 booked_at = 9;   // Unix timestamp
+    int64 created_at = 10;          // Unix timestamp
+    int64 updated_at = 11;          // Unix timestamp
+}
+
+message AddItemRequest {
+    string wishlist_id = 1;
+    string user_id = 2;  // Кто добавляет
+    string name = 3;
+    string description = 4;
+    string image_url = 5;
+    string product_url = 6;
+    int64 price = 7;    // копейки
+}
+
+message GetItemRequest {
+    string id = 1;
+    string user_id = 2; // Кто смотрит
+}
+
+message UpdateItemRequest {
+    string id = 1;
+    string user_id = 2; // Кто обновляет
+    string name = 3;
+    string description = 4;
+    string image_url = 5;
+    string product_url = 6;
+    int64 price = 7;   // копейки
+}
+
+message DeleteItemRequest {
+    string id = 1;
+    string user_id = 2; // Кто удаляет
+}
+
+message ListItemsRequest {
+    string wishlist_id = 1;
+    string user_id = 2; // Кто смотрит
+    int32 page = 3;
+    int32 page_size = 4;
+}
+
+message ItemListResponce {
+    repeated ItemResponce items = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
+    int32 current_page = 4;
+}
+
+// Booking messages
+message BookItemRequest {
+    string item_id = 1;
+    string user_id = 2;  // Кто бронирует
+}
+
+message UnbookItemRequest {
+    string item_id = 1;
+    string user_id = 2;  // Кто отменяет
+}
+
+message GetBookingsRequest {
+    string user_id = 1;  // Чьи бронирования показать
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message Booking {
+    string item_id = 1;
+    string wishlist_id = 2;
+    string user_id = 3;
+    int64 booked_at = 4;
+    string item_name = 5;      // Для удобства отображения
+}
+
+message BookingListResponce {
+    repeated Booking bookings = 1;
+    int32 total_count = 2;
+}

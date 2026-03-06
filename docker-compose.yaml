@@ -1,0 +1,258 @@
+
+networks:
+  wishlist_network:
+    driver: bridge
+
+volumes:
+  zookeeper_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/zookeeper/data
+  zookeeper_log_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/zookeeper/log
+  kafka_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/kafka/data
+  pg_service_auth_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/pg_service_auth
+  pg_service_wishlist_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/pg_service_wishlist
+  pg_service_notify_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/pg_service_notify
+  redis_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/redis
+  logbull_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/.volumes/logbull
+
+services:
+  # ========== POSTGRESS ==========
+  # PostgreSQL для Auth Service
+  pg_service_auth:
+    image: postgres:18-bookworm
+    container_name: pg_service_auth
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${AUTH_DB_NAME}
+      - POSTGRES_USER=${AUTH_DB_USER}
+      - POSTGRES_PASSWORD=${AUTH_DB_PASSWORD}
+    volumes:
+      - pg_service_auth_volume:/var/lib/postgresql/18/docker
+    networks:
+      - wishlist_network
+
+  # PostgreSQL для Wishlist Service
+  pg_service_wishlist:
+    image: postgres:18-bookworm
+    container_name: pg_service_wishlist
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=${WISHLIST_DB_NAME}
+      - POSTGRES_USER=${WISHLIST_DB_USER}
+      - POSTGRES_PASSWORD=${WISHLIST_DB_PASSWORD}
+    volumes:
+      - pg_service_wishlist_volume:/var/lib/postgresql/18/docker
+    networks:
+      - wishlist_network
+
+  # PostgreSQL для Notification Service
+  pg_service_notify:
+    image: postgres:18-bookworm
+    container_name: pg_service_notify
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: notifyDB
+      POSTGRES_USER: notifyAdminUser
+      POSTGRES_PASSWORD: notifyAdminUser
+    volumes:
+      - pg_service_notify_volume:/var/lib/postgresql/18/docker
+    networks:
+      - wishlist_network
+  # Redis для кэша и blacklist токенов
+  redis_service:
+    image: redis:7-alpine
+    container_name: redis_service
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_volume:/data
+    networks:
+      - wishlist_network
+
+  # ========== KAFKA ==========
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: wishlist_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+      # Фиксированный ID для Zookeeper
+      ZOOKEEPER_SERVER_ID: 1
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_volume:/var/lib/zookeeper/data
+      - zookeeper_log_volume:/var/lib/zookeeper/log
+    networks:
+      - wishlist_network
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: wishlist_kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      # Добавь список топиков для автоматического создания
+      #KAFKA_CREATE_TOPICS: "wishlist_events:3:1"  # topic:partitions:replication
+      KAFKA_CONFLUENT_TOPIC_REPLICATION_FACTOR: 1
+      # Фиксированный cluster ID
+      KAFKA_CLUSTER_ID: "wishlist-cluster-2024-01"
+
+    volumes:
+      - kafka_volume:/var/lib/kafka/data
+    networks:
+      - wishlist_network
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== KAFKA UI ==========
+  kafka_ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: wishlist_kafka_ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093 #92
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_READONLY: "false"
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+    networks:
+      - wishlist_network
+
+  # ========== LOG BULL ==========
+  logbull:
+    image: logbull/logbull:latest
+    container_name: wishlist_logbull
+    ports:
+      - "${LOGBULL_PORT}:${LOGBULL_PORT}"  # Web UI
+    environment:
+      - LB_DATA_DIR=/data
+      - LB_PORT=${LOGBULL_PORT} 
+      - LB_API_PORT=${LOGBULL_PORT}
+    volumes:
+      - logbull_volume:/data
+    networks:
+      - wishlist_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:{LOGBULL_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ========== SERVICES ==========
+  # auth_service:
+  #   build: ./authService
+  #   container_name: auth_service
+  #   ports:
+  #     - "50051:50051"
+  #   #environment:
+  #     # - DB_HOST=postgres-auth
+  #     # - DB_PORT=5432
+  #     # - DB_USER=auth_user
+  #     # - DB_PASSWORD=auth_password
+  #     # - DB_NAME=auth
+  #     # - REDIS_HOST=redis
+  #     # - REDIS_PORT=6379
+  #     # - KAFKA_BROKERS=kafka:9092
+  #   depends_on:
+  #     - pg_service_auth
+  #     - redis_service
+  #     - kafka
+  # wishlist_service:
+  #   build: ./wishlistService
+  #   container_name: wishlist_service
+  #   ports:
+  #     - "50052:50052"
+  #   #environment:
+  #     # - DB_HOST=postgres-wishlist
+  #     # - DB_PORT=5432
+  #     # - DB_USER=wishlist_user
+  #     # - DB_PASSWORD=wishlist_password
+  #     # - DB_NAME=wishlist
+  #     # - KAFKA_BROKERS=kafka:9092
+  #     # - AUTH_SERVICE_ADDR=auth-service:50051
+  #   depends_on:
+  #     - pg_service_wishlist
+  #     - kafka
+  #     - auth_service
+  api_gateway_service:
+    build: ./apiGateway
+    container_name: api_gateway_service
+    ports:
+      - "8095:8095"
+    #environment:
+      # - AUTH_SERVICE_ADDR=auth-service:50051
+      # - WISHLIST_SERVICE_ADDR=wishlist-service:50052
+      # - NOTIFICATION_SERVICE_ADDR=notification-service:50053
+    # depends_on: ВЕРНУТЬ 
+      # - auth_service
+      # - wishlist_service
+      #- notification-service  TODO!!!

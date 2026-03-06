@@ -1,0 +1,1028 @@
+basePath: /api/v1
+definitions:
+  handlers.AuthDTO:
+    properties:
+      expires_at:
+        description: |-
+          ExpiresAt Время окончания токена (Unix timestamp)
+          format: date-time
+          example: 1700000000
+        type: integer
+      refresh_token:
+        description: |-
+          Токен для обновления доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      token:
+        description: |-
+          JWT токен доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user_id:
+        description: |-
+          UserID UUID пользователя
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  handlers.BookingDTO:
+    properties:
+      booked_at:
+        description: |-
+          BookedAt Дата и время бронирования
+          format: date-time
+          example: 1700000000
+        type: integer
+      item_id:
+        description: |-
+          ItemID UUID айтема
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      item_name:
+        description: |-
+          ItemName Название айтема, доп инфо чтобы не делать лишний запрос позднее
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: Сертификат на метание топоров
+        type: string
+      user_id:
+        description: |-
+          UserID UUID пользователя который забронировал айтем
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      wishlist_id:
+        description: |-
+          WishlistID UUID вишлиста в котором находитя айтем
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  handlers.BookingListDTO:
+    properties:
+      bookings:
+        description: Bookings Список бронирований
+        items:
+          $ref: '#/definitions/handlers.BookingDTO'
+        type: array
+      total_count:
+        description: |-
+          TotalCount Общее количество бронирований в списке Bookings
+          example: 100
+        type: integer
+    type: object
+  handlers.CreateItemRequestDTO:
+    properties:
+      description:
+        description: |-
+          Description Описание айтема
+          maxLength: 1000
+          example: Сертификат, желательно на четверых, и чтобы красивый был и с топорами
+        type: string
+      image_url:
+        description: |-
+          ImageURL URL изображения
+          format: uri
+          example: https://example.com/image.jpg
+        type: string
+      name:
+        description: |-
+          Name Название айтема
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: Сертификат на метание топоров
+        type: string
+      price:
+        description: |-
+          Price Цена в копейках (или предполагаемая цена)
+          minimum: 0
+          example: 50000
+        type: integer
+      product_url:
+        description: |-
+          ProductURL URL на то где можно приобрести
+          format: uri
+          example: https://example.com/product/123
+        type: string
+    required:
+    - name
+    type: object
+  handlers.CreateWishlistRequestDTO:
+    properties:
+      description:
+        description: |-
+          Description Описание вишлиста
+          maxLength: 1000
+          example: Подарки на мой день рождения
+        type: string
+      is_public:
+        description: |-
+          IsPublic Флаг публичности вишлиста
+          example: true
+        type: boolean
+      title:
+        description: |-
+          Title Название вишлиста
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: На день рождения
+        type: string
+    required:
+    - title
+    type: object
+  handlers.ErrorDTO:
+    properties:
+      error:
+        description: |-
+          Error содержит строку с расшифровкой того что пошло не так
+          minLength: 1
+          maxLength: 100
+          example: item not found
+        type: string
+    type: object
+  handlers.ItemDTO:
+    properties:
+      booked_at:
+        description: |-
+          BookedAt Дата и время бронирования, если есть
+          format: date-time
+          nullable: true
+          example: 1700000000
+        type: integer
+      booked_by:
+        description: |-
+          BookedBy UUID пользователя, забронировавшего предмет, если забронирован
+          format: uuid
+          nullable: true
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      created_at:
+        description: |-
+          CreatedAt Дата и время создания (Unix timestamp)
+          format: date-time
+          example: 1700000000
+        type: integer
+      description:
+        description: |-
+          Description Описание айтема
+          maxLength: 1000
+          example: Сертификат, желательно на четверых, и чтобы красивый был и с топорами
+        type: string
+      id:
+        description: |-
+          ID UUID айтема
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      image_url:
+        description: |-
+          ImageURL URL изображения
+          format: uri
+          example: https://example.com/image.jpg
+        type: string
+      name:
+        description: |-
+          Name Название айтема
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: Сертификат на метание топоров
+        type: string
+      price:
+        description: |-
+          Price Цена в копейках (или предполагаемая цена)
+          minimum: 0
+          example: 50000
+        type: integer
+      product_url:
+        description: |-
+          ProductURL URL на то где можно приобрести
+          format: uri
+          example: https://example.com/product/123
+        type: string
+      updated_at:
+        description: |-
+          UpdatedAt Дата и время последнего обновления (Unix timestamp)
+          format: date-time
+          example: 1700000000
+        type: integer
+      wishlist_id:
+        description: |-
+          ID UUID вишлиста в котором находится айтем
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  handlers.ItemListDTO:
+    properties:
+      current_page:
+        description: |-
+          CurrentPage Текущая страница
+          example: 1
+        type: integer
+      items:
+        description: Items Список айтемов
+        items:
+          $ref: '#/definitions/handlers.ItemDTO'
+        type: array
+      total_count:
+        description: |-
+          TotalCount Общее количество айтемов в списке WishlItemsists
+          example: 100
+        type: integer
+      total_pages:
+        description: |-
+          TotalPages Общее количество страниц
+          example: 10
+        type: integer
+    type: object
+  handlers.LoginRequestDTO:
+    properties:
+      email:
+        description: |-
+          Email пользователя
+          required: true
+          format: email
+          example: user@example.com
+        type: string
+      password:
+        description: |-
+          Пароль пользователя (минимум 4 символа)
+          required: true
+          minLength: 4
+          example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.RegisterRequestDTO:
+    properties:
+      email:
+        description: |-
+          Email пользователя
+          required: true
+          format: email
+          example: user@example.com
+        type: string
+      name:
+        description: |-
+          Имя, ник пользователя
+          required: true
+          example: Иван
+        type: string
+      password:
+        description: |-
+          Пароль пользователя (минимум 4 символа)
+          required: true
+          minLength: 4
+          example: password123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  handlers.UpdateItemRequestDTO:
+    properties:
+      description:
+        description: |-
+          Description Описание айтема
+          maxLength: 1000
+          example: Сертификат, желательно на четверых, и чтобы красивый был и с топорами
+        type: string
+      image_url:
+        description: |-
+          ImageURL URL изображения
+          format: uri
+          example: https://example.com/image.jpg
+        type: string
+      name:
+        description: |-
+          Name Название айтема
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: Сертификат на метание топоров
+        type: string
+      price:
+        description: |-
+          Price Цена в копейках (или предполагаемая цена)
+          minimum: 0
+          example: 50000
+        type: integer
+      product_url:
+        description: |-
+          ProductURL URL на то где можно приобрести
+          format: uri
+          example: https://example.com/product/123
+        type: string
+    required:
+    - name
+    type: object
+  handlers.UpdateWishlistRequestDTO:
+    properties:
+      description:
+        description: |-
+          Description Описание вишлиста
+          maxLength: 1000
+          example: Подарки на мой день рождения
+        type: string
+      is_public:
+        description: |-
+          IsPublic Флаг публичности вишлиста
+          example: true
+        type: boolean
+      title:
+        description: |-
+          Title Название вишлиста
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: На день рождения
+        type: string
+    required:
+    - title
+    type: object
+  handlers.UserInfoDTO:
+    properties:
+      email:
+        description: |-
+          Email пользователя
+          required: true
+          format: email
+          example: user@example.com
+        type: string
+      name:
+        description: |-
+          Name Имя, ник пользователя
+          required: true
+          example: Иван
+        type: string
+      user_id:
+        description: |-
+          UserID UUID пользователя
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  handlers.WishlistDTO:
+    properties:
+      created_at:
+        description: |-
+          CreatedAt Дата и время создания (Unix timestamp)
+          format: date-time
+          example: 1700000000
+        type: integer
+      description:
+        description: |-
+          Description Описание вишлиста
+          maxLength: 1000
+          example: Подарки на мой день рождения
+        type: string
+      id:
+        description: |-
+          ID UUID вишлиста
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_public:
+        description: |-
+          IsPublic Флаг публичности вишлиста
+          example: true
+        type: boolean
+      owner_id:
+        description: |-
+          OwnerID UUID пользователя - владельца вишлиста
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      title:
+        description: |-
+          Title Название вишлиста
+          required: true
+          minLength: 1
+          maxLength: 80
+          example: На день рождения
+        type: string
+      updated_at:
+        description: |-
+          UpdatedAt Дата и время последнего обновления (Unix timestamp)
+          format: date-time
+          example: 1700000000
+        type: integer
+    type: object
+  handlers.WishlistListDTO:
+    properties:
+      current_page:
+        description: |-
+          CurrentPage Текущая страница
+          example: 1
+        type: integer
+      total_count:
+        description: |-
+          TotalCount Общее количество вишлистов в списке Wishlists
+          example: 100
+        type: integer
+      total_pages:
+        description: |-
+          TotalPages Общее количество страниц
+          example: 10
+        type: integer
+      wishlists:
+        description: Wishlists Список вишлистов
+        items:
+          $ref: '#/definitions/handlers.WishlistDTO'
+        type: array
+    type: object
+host: localhost:8095
+info:
+  contact: {}
+  description: API Gateway для микросервисного приложения вишлистов
+  termsOfService: http://swagger.io/terms/
+  title: Wishlist API Gateway
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентификация пользователя и получение JWT токена
+      parameters:
+      - description: Учетные данные
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный вход
+          schema:
+            $ref: '#/definitions/handlers.AuthDTO'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "401":
+          description: Неверные учетные данные
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      summary: Вход в систему
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя в системе
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешная регистрация
+          schema:
+            $ref: '#/definitions/handlers.AuthDTO'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "409":
+          description: Пользователь уже существует
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      summary: Регистрация пользователя
+      tags:
+      - Auth
+  /auth/self:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает данные аутентифицированного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о пользователе
+          schema:
+            $ref: '#/definitions/handlers.UserInfoDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Информация о текущем пользователе
+      tags:
+      - Auth
+  /bookings:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все предметы, забронированные текущим пользователем
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список бронирований
+          schema:
+            $ref: '#/definitions/handlers.BookingListDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Бронирования пользователя
+      tags:
+      - Bookings
+  /items/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет предмет из вишлиста (только владелец)
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Успешное удаление
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Удалить предмет
+      tags:
+      - Items
+    get:
+      consumes:
+      - application/json
+      description: Возвращает предмет по его ID
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Предмет найден
+          schema:
+            $ref: '#/definitions/handlers.ItemDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Получить предмет
+      tags:
+      - Items
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий предмет (только владелец вишлиста)
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новые данные
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateItemRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Предмет обновлен
+          schema:
+            $ref: '#/definitions/handlers.ItemDTO'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Обновить предмет
+      tags:
+      - Items
+  /items/{id}/book:
+    post:
+      consumes:
+      - application/json
+      description: Пользователь бронирует предмет в чужом вишлисте
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Предмет забронирован
+          schema:
+            $ref: '#/definitions/handlers.ItemDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Забронировать предмет
+      tags:
+      - Items
+  /items/{id}/unbook:
+    post:
+      consumes:
+      - application/json
+      description: Отменяет бронирование предмета (бронировавший или владелец)
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Бронирование отменено
+          schema:
+            $ref: '#/definitions/handlers.ItemDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Отменить бронирование
+      tags:
+      - Items
+  /wishlists:
+    post:
+      consumes:
+      - application/json
+      description: Создает новый вишлист для текущего пользователя
+      parameters:
+      - description: Данные вишлиста
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateWishlistRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Вишлист создан
+          schema:
+            $ref: '#/definitions/handlers.WishlistDTO'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Создать вишлист
+      tags:
+      - Wishlists
+  /wishlists/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет вишлист и все его предметы (только владелец)
+      parameters:
+      - description: ID вишлиста
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Успешное удаление
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Удалить вишлист
+      tags:
+      - Wishlists
+    get:
+      consumes:
+      - application/json
+      description: Возвращает вишлист по его ID (публичные доступны всем, приватные
+        только владельцу)
+      parameters:
+      - description: ID вишлиста
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Вишлист найден
+          schema:
+            $ref: '#/definitions/handlers.WishlistDTO'
+        "401":
+          description: Не авторизован для приватного вишлиста
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "404":
+          description: Вишлист не найден
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      summary: Получить вишлист
+      tags:
+      - Wishlists
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий вишлист (только владелец)
+      parameters:
+      - description: ID вишлиста
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новые данные
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateWishlistRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Вишлист обновлен
+          schema:
+            $ref: '#/definitions/handlers.WishlistDTO'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Обновить вишлист
+      tags:
+      - Wishlists
+  /wishlists/{wishlist_id}/items:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список предметов в указанном вишлисте с пагинацией
+      parameters:
+      - description: ID вишлиста
+        in: path
+        name: wishlist_id
+        required: true
+        type: string
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Размер страницы
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список предметов
+          schema:
+            $ref: '#/definitions/handlers.ItemListDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Список предметов
+      tags:
+      - Wishlists
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый предмет в указанный вишлист (только владелец)
+      parameters:
+      - description: ID вишлиста
+        in: path
+        name: wishlist_id
+        required: true
+        type: string
+      - description: Данные предмета
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateItemRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Предмет создан
+          schema:
+            $ref: '#/definitions/handlers.ItemDTO'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Добавить предмет
+      tags:
+      - Wishlists
+  /wishlists/public:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список публичных вишлистов с пагинацией
+      parameters:
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Размер страницы
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список вишлистов
+          schema:
+            $ref: '#/definitions/handlers.WishlistListDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      summary: Список публичных вишлистов
+      tags:
+      - Wishlists
+  /wishlists/user/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все вишлисты указанного пользователя (публичные или
+        все для владельца)
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список вишлистов
+          schema:
+            items:
+              $ref: '#/definitions/handlers.WishlistListDTO'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorDTO'
+      security:
+      - BearerAuth: []
+      summary: Получить вишлисты пользователя
+      tags:
+      - Wishlists
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: Аутентификация и управление пользователями
+  name: Auth
+- description: Управление вишлистами
+  name: Wishlists
+- description: Управление предметами в вишлистах
+  name: Items
+- description: Бронирование предметов
+  name: Bookings
