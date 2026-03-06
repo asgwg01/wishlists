@@ -26,7 +26,7 @@ func main() {
 	defer logFile.Close()
 	log.Info("starting logger")
 
-	// // init app
+	// init app
 	application := app.New(log, config)
 	go application.Start()
 
@@ -98,7 +98,7 @@ func SetupLoger(cfg *config.Config) (*slog.Logger, *os.File) {
 			panic(err)
 		}
 
-		// // Объединяем handlers - логи идут и в файл/консоль, и в Log Bull
+		// Объединяем handlers - логи идут и в файл/консоль, и в Log Bull
 		handler = &logger.MultiHandler{
 			Handlers: []slog.Handler{handler, bullHandler},
 		}

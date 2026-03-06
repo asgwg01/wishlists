@@ -46,10 +46,6 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	}
 	application.wishlistServiceClient = wishlistServiceClient
 
-	// init services
-	// wishlistService := wishlistService.New(log, storage)
-	// itemService := itemservice.New(log, storage, storage, authClient, kafkaProducer)
-
 	// routers
 	router := mux.NewRouter()
 

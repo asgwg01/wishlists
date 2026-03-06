@@ -21,8 +21,6 @@ type KafkaConsumer struct {
 }
 
 func NewKafkaConsumer(log *slog.Logger, cfg config.KafkaConfig, notifier *email.EmailNotifier) *KafkaConsumer {
-	fmt.Println(cfg)
-	log.Debug("!!!!!!", slog.String("cfg", fmt.Sprintf("%v", cfg)))
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        []string{cfg.BrokerUrl + ":" + cfg.BrokerPort},
 		Topic:          cfg.Topic,
@@ -63,7 +61,7 @@ func (c *KafkaConsumer) Start(ctx context.Context) error {
 				continue
 			}
 
-			// Обрабатываем сообщение в отдельной горутине
+			// в горутине
 			go c.processMessage(ctx, msg)
 		}
 	}

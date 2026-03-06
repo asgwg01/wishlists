@@ -14,10 +14,9 @@ func GrpcToDomainError(grpcError error) error {
 		return grpcError
 	}
 
-	// Получаем код и сообщение
 	code := st.Code()
 	message := st.Message()
-	// Обрабатываем конкретные коды
+
 	switch code {
 	case codes.NotFound:
 		return fmt.Errorf("%s: %w", message, types.ErrorNotFound)

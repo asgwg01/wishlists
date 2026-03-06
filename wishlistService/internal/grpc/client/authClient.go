@@ -46,7 +46,6 @@ func NewAuthClient(addr string, port string) (*AuthClient, error) {
 	}, nil
 }
 
-// GetUserInfo получает информацию о пользователе по ID
 func (c *AuthClient) GetUserInfo(ctx context.Context, userID string) (*UserInfo, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 

@@ -11,7 +11,7 @@ func UserToSlog(user models.User) slog.Attr {
 		slog.String("id", user.ID.String()),
 		slog.String("email", user.Email),
 		slog.String("name", user.Name),
-		slog.String("pwd", string(user.PasswordHash)), // TODO! remove
+		//slog.String("pwd", string(user.PasswordHash)),
 		slog.Time("create_at", user.CreateAt),
 		slog.Time("update_at", user.UpdateAt),
 	)

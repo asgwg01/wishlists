@@ -13,7 +13,6 @@ import (
 type App struct {
 	log           *slog.Logger
 	kafkaConsumer *consumer.KafkaConsumer
-	//emailNotifier *email.EmailNotifier
 	ctx           context.Context
 	cancelCalback context.CancelFunc
 }
@@ -30,7 +29,6 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	return &App{
 		log:           log,
 		kafkaConsumer: kafkaConsumer,
-		//emailNotifier: emailNotifier,
 		ctx:           ctx,
 		cancelCalback: cancel,
 	}
@@ -40,7 +38,6 @@ func (a *App) Start() {
 	const logPrefix = "app.Start"
 	log := a.log.With(
 		slog.String("where", logPrefix),
-		// slog.String("host", a.server.Addr),
 	)
 
 	log.Info("start server")

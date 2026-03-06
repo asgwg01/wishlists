@@ -531,7 +531,7 @@ func (s *ItemService) SendKafkaUnbookedEvent(ctx context.Context, userID uuid.UU
 		}
 	}
 
-	// Получаем информацию о том, кто ИЗНАЧАЛЬНО бронировал (для уведомлений)
+	// кто изначально бронировал
 	bookedByInfo, err := s.authClient.GetUserInfo(ctx, lastOwnerID.String())
 	if err != nil {
 		log.Error("Failed to get user info", slog.String("err", err.Error()))
@@ -542,7 +542,6 @@ func (s *ItemService) SendKafkaUnbookedEvent(ctx context.Context, userID uuid.UU
 		}
 	}
 
-	// Определяем причину отмены
 	reason := "cancelled_by_user"
 	if userInfo.UserID == ownerInfo.UserID {
 		reason = "cancelled_by_owner"

@@ -28,7 +28,6 @@ type IWshlistService interface {
 	PublicWishlists(ctx context.Context, page, pageSize int) ([]models.Wishlist, int, error)
 }
 
-// New return a new instance of the Auth service (service layer)
 func New(
 	log *slog.Logger,
 	wishlistStorage storage.IWishlistStorage,

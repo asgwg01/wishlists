@@ -73,7 +73,6 @@ func (a *App) Start() {
 	const logPrefix = "app.Start"
 	log := a.log.With(
 		slog.String("where", logPrefix),
-		//slog.String("host", a.serve),
 	)
 
 	// Запускаем gRPC сервер

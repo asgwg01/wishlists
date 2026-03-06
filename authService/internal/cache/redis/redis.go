@@ -27,15 +27,6 @@ func NewCache(log *slog.Logger, cfg *config.RedisConfig) (*Cache, error) {
 		DB:       0,
 	})
 
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-
-	// if err := client.Ping(ctx).Err(); err != nil {
-	//     log.Fatalf("Failed to connect to Redis: %v", err)
-	// }
-
-	//return client
-
 	return &Cache{log: l, redisClient: client}, nil
 }
 

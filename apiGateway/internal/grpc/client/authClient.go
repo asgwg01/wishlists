@@ -114,7 +114,6 @@ func (c *AuthClient) Login(ctx context.Context, email, password string) (*UserIn
 	}, resp.Token, nil
 }
 
-// GetUserInfo получает информацию о пользователе по ID
 func (c *AuthClient) GetUserInfo(ctx context.Context, userID string) (*UserInfo, error) {
 	ctx = trace.InjectIntoGRPC(ctx)
 

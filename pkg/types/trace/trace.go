@@ -64,11 +64,3 @@ func InjectIntoGRPC(ctx context.Context) context.Context {
 
 	return metadata.NewOutgoingContext(ctx, md)
 }
-
-// // InjectIntoHTTP добавляет trace ID в HTTP заголовки
-// func InjectIntoHTTP(ctx context.Context, header map[string][]string) {
-// 	traceID := GetTraceID(ctx)
-// 	if traceID != "" {
-// 		header[HeaderKey] = []string{traceID}
-// 	}
-// }
