@@ -1,11 +1,19 @@
-http_server:
-  addres: "0.0.0.0:8090"
-  timeout: 4s
-  idle_timeout: 60s
+env: "local" # local, dev, env
 
-storage:
-  storage_host: "localhost"
-  storage_port: "5432"
-  storage_db: "postgres"
-  storage_user: "postgres"
-  storage_password: "0000"
+kafka:
+  broker_url: "localhost"
+  broker_port: "9092"
+  topic: "wishlist_events"
+  group_id: "notification_group"
+  
+logbull:
+  url: "localhost"
+  port: "4005"
+  project_id: ""
+
+smtp:
+  host: "smtp.gmail.com"
+  port: "587"
+  user: "usrEmail@gmail.com"
+  password: "userPwd"
+  from: "notifications@wishlist.app"

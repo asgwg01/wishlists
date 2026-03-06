@@ -91,20 +91,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # PostgreSQL для Notification Service
-  pg_service_notify:
-    image: postgres:18-bookworm
-    container_name: pg_service_notify
-    ports:
-      - "5434:5432"
-    environment:
-      POSTGRES_DB: notifyDB
-      POSTGRES_USER: notifyAdminUser
-      POSTGRES_PASSWORD: notifyAdminUser
-    volumes:
-      - pg_service_notify_volume:/var/lib/postgresql/18/docker
-    networks:
-      - wishlist_network
   # Redis для кэша и blacklist токенов
   redis_service:
     image: redis:7-alpine
@@ -147,13 +133,13 @@ services:
         condition: service_healthy
     ports:
       - "${KAFKA_BROKER_PORT}:${KAFKA_BROKER_PORT}"
-      - "9093:9093"
+      - "${KAFKA_BROKER_CONSUMER_PORT}:${KAFKA_BROKER_CONSUMER_PORT}"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_BROKER_PORT},PLAINTEXT_HOST://kafka:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_BROKER_PORT},PLAINTEXT_HOST://kafka:${KAFKA_BROKER_CONSUMER_PORT}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:${KAFKA_BROKER_PORT},PLAINTEXT_HOST://0.0.0.0:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:${KAFKA_BROKER_PORT},PLAINTEXT_HOST://0.0.0.0:${KAFKA_BROKER_CONSUMER_PORT}
 
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -181,7 +167,7 @@ services:
       kafka:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "${KAFKA_UI_PORT}:${KAFKA_UI_PORT}"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093 #92
@@ -255,4 +241,15 @@ services:
       - logbull
       - auth_service
       - wishlist_service
-      #- notification-service  TODO!!!
+      - notification_service
+  
+  notification_service:
+    build: ./notificationService
+    container_name: notification_service
+    env_file:
+      - .env
+    networks:
+    - wishlist_network
+    depends_on:
+      kafka:
+        condition: service_healthy

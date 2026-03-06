@@ -57,6 +57,7 @@ func (p *KafkaProducer) PublishItemBooked(ctx context.Context, event ItemBookedE
 	// Сериализуем событие в JSON
 	data, err := json.Marshal(event)
 	if err != nil {
+		log.Error("failed to marshal event", slog.String("err", err.Error()))
 		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
@@ -95,6 +96,7 @@ func (p *KafkaProducer) PublishItemUnbooked(ctx context.Context, event ItemUnboo
 
 	data, err := json.Marshal(event)
 	if err != nil {
+		log.Error("failed to marshal event", slog.String("err", err.Error()))
 		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
@@ -137,6 +139,7 @@ func createTopicIfNotExists(l *slog.Logger, broker string, topic string) error {
 
 	conn, err := kafka.Dial("tcp", broker)
 	if err != nil {
+		log.Error("failed create topic", slog.String("err", err.Error()))
 		return err
 	}
 	defer conn.Close()

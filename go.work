@@ -1,0 +1,10 @@
+go 1.25.6
+
+use (
+	./apiGateway
+	./authService
+	./notificationService
+	./pkg
+	./webClient
+	./wishlistService
+)

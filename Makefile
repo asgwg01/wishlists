@@ -23,10 +23,24 @@ wishlist-infra-deploy:
 	mkdir -p .volumes/pg_service_notify
 	mkdir -p .volumes/logbull
 	mkdir -p .volumes/redis
+	docker compose up --build -d pg_service_auth pg_service_wishlist pg_service_notify redis_service zookeeper kafka kafka_ui logbull
+
+wishlist-infra-undeploy:
+	docker compose down pg_service_auth pg_service_wishlist pg_service_notify redis_service zookeeper kafka kafka_ui logbull
+
+wishlist-deploy:
+	mkdir -p .volumes/zookeeper/data
+	mkdir -p .volumes/zookeeper/log
+	mkdir -p .volumes/kafka/data
+	mkdir -p .volumes/pg_service_auth
+	mkdir -p .volumes/pg_service_wishlist
+	mkdir -p .volumes/pg_service_notify
+	mkdir -p .volumes/logbull
+	mkdir -p .volumes/redis
 	docker compose up --build -d
 
 # Остановка инфраструктуры
-wishlist-infra-undeploy:
+wishlist-undeploy:
 	docker compose down
 
 # Генерация protobuf файлов
@@ -43,42 +57,21 @@ wishlist-protobuf-generate:
 wishlist-authService-run:
 	cd authService && go run cmd/authService/main.go
 
-wishlist-authService-build:
-	cd authService && go build -o .bin/authService cmd/authService/main.go
-	
-
-wishlist-authService-start:
-	cd authService && .bin/authService
-
-
 # wishlistService
 wishlist-wishlistService-run:
 	cd wishlistService && go run cmd/wishlistService/main.go
-
-wishlist-wishlistService-build:
-	cd wishlistService && go build -o .bin/wishlistService cmd/wishlistService/main.go
-
-wishlist-wishlistService-start:
-	cd wishlistService && .bin/wishlistService
 
 # apiGatewayService
 wishlist-apiGateway-run:
 	cd apiGateway && go run cmd/apiGateway/main.go
 
-wishlist-apiGateway-build:
-	cd apiGateway && go build -o .bin/apiGateway cmd/apiGateway/main.go
-
-wishlist-apiGateway-start:
-	cd apiGateway && .bin/apiGateway
-
-
-
+# notificationService
 wishlist-notificationService-run:
 	cd notificationService && go run cmd/notificationService/main.go
 
-
-wishlist-httpClient-run:
-	cd httpClient && go run cmd/httpClient/main.go
+# webClient
+wishlist-webClient-run:
+	cd webClient && go run cmd/webClient/main.go
 
 wishlist-proto-gen:
 	@echo "Generating protobuf code..."
@@ -103,10 +96,6 @@ wishlist-proto-regen: wishlist-proto-clean wishlist-proto-gen
 
 swagger-init:
 	cd apiGateway && swag init -g cmd/apiGateway/main.go
-# wishlist-run: # RUN ALL SERVICES LOCAL
-# 	$(MAKE) wishlist-authService-run
-# 	$(MAKE) wishlist-authService-run
-
 
 # test:
 # 	go test TODO!!!
