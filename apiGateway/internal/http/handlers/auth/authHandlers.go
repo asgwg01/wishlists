@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/asgwg01/wishlists/pkg/types/trace"
+	"github.com/gorilla/mux"
 )
 
 type AuthHandlers struct {
@@ -164,6 +165,50 @@ func (h *AuthHandlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 		UserID: userID,
 		Email:  userEmail,
 		Name:   userName,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Error("Error Encode DTO", slog.String("err", err.Error()))
+		return
+	}
+}
+
+// GetUserInfo возвращает информацию о пользователе по id
+// @Summary      Информация о текущем пользователе
+// @Description  Возвращает данные аутентифицированного пользователя
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Security BearerAuth
+// @Success      200  {object}  handlers.UserInfoDTO  "Информация о пользователе"
+// @Failure      401  {object}  handlers.ErrorDTO     "Не авторизован"
+// @Failure      500  {object}  handlers.ErrorDTO     "Внутренняя ошибка сервера"
+// @Router       /auth/self [get]
+func (h *AuthHandlers) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	const logPrefix = "handlers.auth.GetUserInfo"
+	log := h.log.With(
+		slog.String("where", logPrefix),
+		slog.String("trace_id", trace.GetTraceID(r.Context())),
+	)
+
+	log.Info("Recive message", slog.String("method", r.Method), slog.String("url", r.URL.String()))
+
+	vars := mux.Vars(r)
+	targetUserID := vars["user_id"]
+
+	userInfo, err := h.authClient.GetUserInfo(r.Context(), targetUserID)
+	if err != nil {
+		handlers.SendError(log, w, http.StatusUnauthorized, "login failed", "login failed: "+err.Error())
+		return
+	}
+
+	response := handlers.UserInfoDTO{
+		UserID: userInfo.UserID,
+		Email:  userInfo.Email,
+		Name:   userInfo.Name,
 	}
 
 	w.WriteHeader(http.StatusOK)

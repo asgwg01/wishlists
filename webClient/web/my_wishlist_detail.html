@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой вишлист - Wishlist App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        .items-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        .wishlist-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .delete-btn {
+            background-color: var(--danger-color);
+        }
+        .delete-btn:hover {
+            background-color: #c53030;
+        }
+        
+        /* Стили для информации о забронировавшем */
+        .item-status-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .booked-by-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .booked-by-info {
+            background-color: rgba(221, 107, 32, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            color: var(--warning-color);
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        .booked-by-me-label {
+            background-color: rgba(44, 122, 123, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        /* Стили для кнопок действий */
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Анимация для индикатора загрузки */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <div class="back-link" style="margin-bottom: 1.5rem;">
+            <a href="/my_wishlists" class="btn btn-secondary">
+                <span>←</span> Назад к вишлистам
+            </a>
+        </div>
+        
+        <div id="wishlistInfo" class="page-header">
+            <!-- Заполняется динамически -->
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Загрузка информации о вишлисте...</p>
+            </div>
+        </div>
+        
+        <div class="items-header">
+            <h2>Предметы</h2>
+            <button class="btn" onclick="showAddItemModal()">
+                <span>➕</span> Добавить предмет
+            </button>
+        </div>
+        
+        <div id="itemsContainer" class="items-list">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Загрузка предметов...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно редактирования вишлиста -->
+    <div id="editWishlistModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Редактировать вишлист</h2>
+                <span class="close" onclick="hideModal('editWishlistModal')">&times;</span>
+            </div>
+            <form id="editWishlistForm">
+                <input type="hidden" id="editWishlistId">
+                <div class="form-group">
+                    <label for="editTitle">Название *</label>
+                    <input type="text" id="editTitle" required maxlength="80">
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Описание</label>
+                    <textarea id="editDescription" maxlength="1000" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="editIsPublic">
+                        <span>🌐 Публичный вишлист (доступен всем)</span>
+                    </label>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('editWishlistModal')">Отмена</button>
+                    <button type="submit" class="btn">💾 Сохранить</button>
+                </div>
+            </form>
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn delete-btn" onclick="confirmDeleteWishlist()" style="width: 100%;">
+                    🗑️ Удалить вишлист
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления вишлиста -->
+    <div id="deleteWishlistModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Подтверждение удаления</h2>
+                <span class="close" onclick="hideModal('deleteWishlistModal')">&times;</span>
+            </div>
+            <div style="text-align: center; padding: 1rem 0;">
+                <p style="margin-bottom: 2rem; color: var(--text-secondary);">
+                    Вы уверены, что хотите удалить этот вишлист?<br>
+                    <strong>Это действие нельзя отменить!</strong>
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-secondary" onclick="hideModal('deleteWishlistModal')">Отмена</button>
+                    <button class="btn delete-btn" onclick="deleteWishlist()">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для предметов -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="itemModalTitle">Добавить предмет</h2>
+                <span class="close" onclick="hideModal('itemModal')">&times;</span>
+            </div>
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+                <div class="form-group">
+                    <label for="itemName">Название *</label>
+                    <input type="text" id="itemName" required 
+                           maxlength="80" placeholder="Например: Книга">
+                </div>
+                <div class="form-group">
+                    <label for="itemDescription">Описание</label>
+                    <textarea id="itemDescription" maxlength="1000" 
+                              placeholder="Подробное описание..." rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="itemPrice">Цена (₽)</label>
+                    <input type="number" id="itemPrice" step="0.01" min="0" 
+                           placeholder="1500.00">
+                </div>
+                <div class="form-group">
+                    <label for="itemImageUrl">Ссылка на изображение</label>
+                    <input type="url" id="itemImageUrl" 
+                           placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="itemProductUrl">Ссылка на товар</label>
+                    <input type="url" id="itemProductUrl" 
+                           placeholder="https://example.com/product/123">
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('itemModal')">Отмена</button>
+                    <button type="submit" class="btn">💾 Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Глобальные переменные
+        let currentWishlist = null;
+        let currentItems = [];
+        let wishlistId = window.location.pathname.split('/').pop();
+
+        // Проверяем авторизацию
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Page loaded, wishlistId:', wishlistId);
+            
+            // Инициализируем Auth
+            if (typeof Auth !== 'undefined') {
+                await Auth.init();
+            }
+            
+            if (!Auth.requireAuth()) {
+                return;
+            }
+            
+            // Проверяем валидность ID (UUID формат)
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+            if (!uuidRegex.test(wishlistId)) {
+                console.error('Invalid wishlist ID:', wishlistId);
+                window.location.href = '/my_wishlists';
+                return;
+            }
+            
+            // Загружаем данные
+            await loadWishlistDetail(wishlistId);
+        });
+
+        // Загрузка информации о вишлисте
+        async function loadWishlistDetail(wishlistId) {
+            const wishlistInfo = document.getElementById('wishlistInfo');
+            
+            try {
+                console.log('Loading wishlist details for ID:', wishlistId);
+                
+                // Загружаем вишлист
+                const wishlist = await API.getWishlist(wishlistId);
+                console.log('Wishlist loaded:', wishlist);
+                
+                currentWishlist = wishlist;
+                
+                // Проверяем, принадлежит ли вишлист текущему пользователю
+                if (wishlist.owner_id !== Auth.currentUser?.id) {
+                    console.error('Wishlist does not belong to current user');
+                    window.location.href = '/my_wishlists';
+                    return;
+                }
+                
+                displayWishlistInfo(wishlist);
+                
+                // Загружаем предметы
+                await loadItems(wishlistId);
+                
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+                
+                wishlistInfo.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Ошибка загрузки:</strong> ${error.message}
+                    </div>
+                `;
+                
+                if (error.message === 'Unauthorized') {
+                    window.location.href = '/login';
+                }
+            }
+        }
+        
+        // Отображение информации о вишлисте
+        function displayWishlistInfo(wishlist) {
+            const wishlistInfo = document.getElementById('wishlistInfo');
+            
+            const date = new Date(wishlist.created_at * 1000).toLocaleDateString('ru-RU');
+            const updatedDate = wishlist.updated_at !== wishlist.created_at ? 
+                new Date(wishlist.updated_at * 1000).toLocaleDateString('ru-RU') : null;
+            
+            wishlistInfo.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">${Components.escapeHtml(wishlist.title)}</h2>
+                        ${wishlist.is_public ? 
+                            '<span class="card-badge">🌐 Публичный</span>' : 
+                            '<span class="card-badge">🔒 Приватный</span>'}
+                    </div>
+                    <div class="card-content">
+                        ${Components.escapeHtml(wishlist.description || 'Нет описания')}
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <span>📅 Создан: ${date}</span>
+                            ${updatedDate ? `<span>📝 Обновлен: ${updatedDate}</span>` : ''}
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick='showEditWishlistModal(${JSON.stringify(wishlist).replace(/'/g, "\\'")})'>
+                            <span>✏️</span> Редактировать
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Загрузка предметов
+        async function loadItems(wishlistId) {
+            const itemsContainer = document.getElementById('itemsContainer');
+            
+            try {
+                console.log('Loading items for wishlist:', wishlistId);
+                
+                const itemsData = await API.getItems(wishlistId);
+                console.log('Items loaded:', itemsData);
+                
+                currentItems = itemsData.items || [];
+                
+                await updateItemsUI();
+                
+            } catch (error) {
+                console.error('Error loading items:', error);
+                itemsContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Ошибка загрузки предметов:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Функция для обновления UI предметов без перезагрузки страницы
+        async function updateItemsUI() {
+            const itemsContainer = document.getElementById('itemsContainer');
+            
+            if (!currentItems || currentItems.length === 0) {
+                itemsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <h3 class="empty-state-title">В этом вишлисте пока нет предметов</h3>
+                        <p class="empty-state-description">
+                            Добавьте предметы, чтобы друзья знали, что вам подарить!
+                        </p>
+                        <button class="btn" onclick="showAddItemModal()">
+                            ➕ Добавить предмет
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Собираем ID всех пользователей, которые забронировали предметы
+            const bookedByUserIds = currentItems
+                .filter(item => item.booked_by)
+                .map(item => item.booked_by);
+            
+            // Загружаем информацию о пользователях, которые забронировали предметы
+            const bookedByUsersMap = new Map();
+            if (bookedByUserIds.length > 0) {
+                const uniqueIds = [...new Set(bookedByUserIds)];
+                await Promise.all(uniqueIds.map(async (userId) => {
+                    try {
+                        const userInfo = await API.getUserInfo(userId);
+                        bookedByUsersMap.set(userId, userInfo);
+                    } catch (error) {
+                        console.error(`Error loading user info for ${userId}:`, error);
+                    }
+                }));
+            }
+            
+            let itemsHtml = '<div class="items-list">';
+            currentItems.forEach(item => {
+                const bookedByUser = item.booked_by ? bookedByUsersMap.get(item.booked_by) : null;
+                itemsHtml += Components.createItemCard(item, true, Auth.currentUser?.id, bookedByUser);
+            });
+            itemsHtml += '</div>';
+            
+            itemsContainer.innerHTML = itemsHtml;
+        }
+        
+        // Функции для работы с вишлистом
+        window.showEditWishlistModal = function(wishlist) {
+            document.getElementById('editWishlistId').value = wishlist.id;
+            document.getElementById('editTitle').value = wishlist.title;
+            document.getElementById('editDescription').value = wishlist.description || '';
+            document.getElementById('editIsPublic').checked = wishlist.is_public;
+            
+            showModal('editWishlistModal');
+        };
+        
+        window.confirmDeleteWishlist = function() {
+            hideModal('editWishlistModal');
+            showModal('deleteWishlistModal');
+        };
+        
+        window.deleteWishlist = async function() {
+            try {
+                await API.deleteWishlist(wishlistId);
+                
+                Components.showAlert('Вишлист удален', 'success');
+                hideModal('deleteWishlistModal');
+                
+                setTimeout(() => {
+                    window.location.href = '/my_wishlists';
+                }, 1000);
+            } catch (error) {
+                Components.showAlert(error.message || 'Ошибка удаления', 'error');
+                hideModal('deleteWishlistModal');
+            }
+        };
+        
+        // Функция для снятия брони (для владельца вишлиста)
+        window.unbookItem = async function(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) return;
+            
+            // Определяем, кто забронировал
+            let bookedByName = 'Пользователь';
+            if (item.booked_by) {
+                try {
+                    const userInfo = await API.getUserInfo(item.booked_by);
+                    bookedByName = userInfo.name || userInfo.email || 'Пользователь';
+                } catch (error) {
+                    console.error('Error loading booker info:', error);
+                }
+            }
+            
+            // Спрашиваем подтверждение
+            const confirmMsg = item.booked_by === Auth.currentUser?.id 
+                ? 'Вы уверены, что хотите снять свою бронь с этого предмета?'
+                : `Вы уверены, что хотите снять бронь пользователя "${bookedByName}" с этого предмета?`;
+            
+            if (!confirm(confirmMsg)) return;
+            
+            try {
+                // Показываем индикатор загрузки на кнопке
+                const unbookBtn = document.querySelector(`.item-card[data-id="${itemId}"] .btn-warning`);
+                if (unbookBtn) {
+                    const originalText = unbookBtn.innerHTML;
+                    unbookBtn.innerHTML = '<span class="loading-spinner"></span> Снятие...';
+                    unbookBtn.disabled = true;
+                }
+                
+                await API.unbookItem(itemId);
+                
+                // Обновляем локальные данные
+                const itemIndex = currentItems.findIndex(i => i.id === itemId);
+                if (itemIndex !== -1) {
+                    // Очищаем информацию о бронировании
+                    currentItems[itemIndex].booked_by = null;
+                    currentItems[itemIndex].booked_at = null;
+                }
+                
+                // Обновляем UI без перезагрузки страницы
+                await updateItemsUI();
+                
+                Components.showAlert('Бронь успешно снята', 'success');
+                
+            } catch (error) {
+                console.error('Error unbooking item:', error);
+                Components.showAlert(error.message || 'Ошибка при снятии брони', 'error');
+                
+                // Восстанавливаем кнопку в случае ошибки
+                const unbookBtn = document.querySelector(`.item-card[data-id="${itemId}"] .btn-warning`);
+                if (unbookBtn) {
+                    unbookBtn.innerHTML = '🔄 Снять бронь';
+                    unbookBtn.disabled = false;
+                }
+            }
+        };
+        
+        // Функции для работы с предметами
+        window.showAddItemModal = function() {
+            document.getElementById('itemModalTitle').textContent = 'Добавить предмет';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemId').value = '';
+            showModal('itemModal');
+        };
+        
+        window.editItem = async function(itemId) {
+            try {
+                const item = await API.getItem(itemId);
+                
+                document.getElementById('itemModalTitle').textContent = 'Редактировать предмет';
+                document.getElementById('itemId').value = item.id;
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemDescription').value = item.description || '';
+                
+                const priceInRubles = item.price ? (item.price / 100).toFixed(2) : '';
+                document.getElementById('itemPrice').value = priceInRubles;
+                
+                document.getElementById('itemImageUrl').value = item.image_url || '';
+                document.getElementById('itemProductUrl').value = item.product_url || '';
+                
+                showModal('itemModal');
+            } catch (error) {
+                Components.showAlert('Ошибка загрузки предмета', 'error');
+            }
+        };
+        
+        window.deleteItem = async function(itemId) {
+            if (!confirm('Удалить этот предмет?')) return;
+            
+            try {
+                // Показываем индикатор загрузки
+                const deleteBtn = document.querySelector(`.item-card[data-id="${itemId}"] .btn-danger`);
+                if (deleteBtn) {
+                    deleteBtn.innerHTML = '<span class="loading-spinner"></span> Удаление...';
+                    deleteBtn.disabled = true;
+                }
+                
+                await API.deleteItem(itemId);
+                
+                // Удаляем предмет из локального массива
+                currentItems = currentItems.filter(item => item.id !== itemId);
+                
+                // Обновляем UI
+                await updateItemsUI();
+                
+                Components.showAlert('Предмет удален', 'success');
+                
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                Components.showAlert(error.message || 'Ошибка удаления', 'error');
+                
+                // Восстанавливаем кнопку в случае ошибки
+                const deleteBtn = document.querySelector(`.item-card[data-id="${itemId}"] .btn-danger`);
+                if (deleteBtn) {
+                    deleteBtn.innerHTML = '🗑️ Удалить';
+                    deleteBtn.disabled = false;
+                }
+            }
+        };
+        
+        // Обработка формы редактирования вишлиста
+        document.getElementById('editWishlistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editWishlistId').value;
+            const title = document.getElementById('editTitle').value;
+            const description = document.getElementById('editDescription').value;
+            const isPublic = document.getElementById('editIsPublic').checked;
+            
+            if (!title.trim()) {
+                Components.showAlert('Название обязательно', 'warning');
+                return;
+            }
+            
+            // Блокируем кнопку сохранения
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Сохранение...';
+            submitBtn.disabled = true;
+            
+            try {
+                await API.updateWishlist(id, {
+                    title: title.trim(),
+                    description: description.trim() || '',
+                    is_public: isPublic
+                });
+                
+                hideModal('editWishlistModal');
+                Components.showAlert('Вишлист обновлен', 'success');
+                
+                // Обновляем информацию о вишлисте
+                await loadWishlistDetail(id);
+                
+            } catch (error) {
+                Components.showAlert(error.message || 'Ошибка обновления', 'error');
+            } finally {
+                // Восстанавливаем кнопку
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Обработка формы предмета
+        document.getElementById('itemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const itemData = {
+                name: document.getElementById('itemName').value,
+                description: document.getElementById('itemDescription').value || '',
+                price: document.getElementById('itemPrice').value ? 
+                    API.parsePrice(document.getElementById('itemPrice').value) : 0,
+                image_url: document.getElementById('itemImageUrl').value || '',
+                product_url: document.getElementById('itemProductUrl').value || ''
+            };
+            
+            const itemId = document.getElementById('itemId').value;
+            
+            if (!itemData.name.trim()) {
+                Components.showAlert('Название предмета обязательно', 'warning');
+                return;
+            }
+            
+            // Блокируем кнопку сохранения
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Сохранение...';
+            submitBtn.disabled = true;
+            
+            try {
+                if (itemId) {
+                    // Обновление существующего предмета
+                    const updatedItem = await API.updateItem(itemId, itemData);
+                    
+                    // Обновляем предмет в локальном массиве
+                    const index = currentItems.findIndex(item => item.id === itemId);
+                    if (index !== -1) {
+                        currentItems[index] = { ...currentItems[index], ...updatedItem };
+                    }
+                    
+                    Components.showAlert('Предмет обновлен', 'success');
+                } else {
+                    // Создание нового предмета
+                    const newItem = await API.createItem(wishlistId, itemData);
+                    
+                    // Добавляем новый предмет в локальный массив
+                    currentItems.push(newItem);
+                    
+                    Components.showAlert('Предмет добавлен', 'success');
+                }
+                
+                hideModal('itemModal');
+                
+                // Обновляем UI без перезагрузки страницы
+                await updateItemsUI();
+                
+            } catch (error) {
+                console.error('Error saving item:', error);
+                Components.showAlert(error.message || 'Ошибка сохранения', 'error');
+            } finally {
+                // Восстанавливаем кнопку
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Вспомогательные функции для модальных окон
+        window.showModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'block';
+        };
+
+        window.hideModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none';
+        };
+
+        // Закрытие модальных окон по клику вне
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

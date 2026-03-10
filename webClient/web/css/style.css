@@ -1,0 +1,331 @@
+/* Импорт темы */
+@import url('dark-theme.css');
+
+/* Дополнительные стили для специфических компонентов */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+/* Стили для shared компонентов */
+.header-placeholder,
+.footer-placeholder {
+    display: contents;
+}
+
+/* Анимации */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Дополнительные эффекты для кнопок */
+
+/* Эффект пульсации для активной кнопки */
+.nav-btn.active {
+    animation: pulse 2s infinite;
+}
+
+/* Эффект волны при клике */
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+/* Эффект для логотипа */
+.logo a {
+    position: relative;
+}
+
+.logo a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.logo a:hover::after {
+    width: 100%;
+}
+
+/* Эффект для иконок */
+.nav-btn span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.nav-btn:hover span {
+    transform: rotate(10deg) scale(1.2);
+}
+
+/* Эффект для email */
+.user-email {
+    position: relative;
+    overflow: hidden;
+}
+
+.user-email::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+    20% {
+        transform: translateX(100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) rotate(45deg);
+    }
+}
+
+/* Эффект загрузки для кнопок */
+.nav-btn.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.nav-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: button-spin 0.6s linear infinite;
+}
+
+@keyframes button-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Эффект появления кнопок */
+.nav-btn {
+    animation: fadeInUp 0.5s ease backwards;
+}
+
+.nav-btn:nth-child(1) { animation-delay: 0.1s; }
+.nav-btn:nth-child(2) { animation-delay: 0.2s; }
+.nav-btn:nth-child(3) { animation-delay: 0.3s; }
+.nav-btn:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Эффект для активной кнопки при наведении */
+.nav-btn.active:hover {
+    background: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(44, 122, 123, 0.4);
+}
+
+/* Эффект для кнопки выхода */
+.nav-btn-logout:hover span {
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+/* Эффект для иконок в кнопках регистрации/входа */
+.nav-btn-login:hover span,
+.nav-btn-register:hover span {
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Дополнительные стили для страницы поиска */
+.owner-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.owner-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.owner-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.owner-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.owner-email {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Стили для информации о владельце на странице просмотра */
+.owner-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.owner-avatar-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.owner-details {
+    flex: 1;
+}
+
+.owner-name-large {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.owner-email-large {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Статистика вишлиста */
+.wishlist-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Уведомление о бронировании */
+.booking-notice {
+    background-color: rgba(44, 122, 123, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-secondary);
+}
+
+.booking-notice-icon {
+    font-size: 1.5rem;
+}
+
+/* Пагинация */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.pagination-info {
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}

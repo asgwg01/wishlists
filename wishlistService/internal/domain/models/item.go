@@ -70,12 +70,12 @@ func (i *Item) Book(userID uuid.UUID) error {
 	return nil
 }
 
-func (i *Item) Unbook(userID uuid.UUID) error {
+func (i *Item) Unbook(userID uuid.UUID, isSelf bool) error {
 	if i.BookedBy == nil {
 		return types.ErrorItemNotBooked
 	}
 
-	if *i.BookedBy != userID {
+	if *i.BookedBy != userID && !isSelf {
 		return types.ErrorAccessDenied
 	}
 
@@ -84,4 +84,10 @@ func (i *Item) Unbook(userID uuid.UUID) error {
 	i.UpdatedAt = time.Now()
 
 	return nil
+}
+
+func (i *Item) UnbookForce() {
+	i.BookedBy = nil
+	i.BookedAt = nil
+	i.UpdatedAt = time.Now()
 }

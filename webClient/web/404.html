@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Страница не найдена</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 100px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .error-title {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+        .error-message {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 40px;
+        }
+        .home-link {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .home-link:hover {
+            background-color: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/">🎁 Wishlist App</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="error-container">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Страница не найдена</h1>
+            <p class="error-message">
+                Извините, запрашиваемая страница не существует или была перемещена.
+            </p>
+            <a href="/" class="home-link">Вернуться на главную</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Wishlist App. Все права защищены.</p>
+    </footer>
+</body>
+</html>

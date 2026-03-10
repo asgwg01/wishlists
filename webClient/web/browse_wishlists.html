@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск вишлистов - Wishlist App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .search-section {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .search-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .search-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .search-field label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .search-field input {
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-field input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 122, 123, 0.2);
+        }
+        
+        .search-btn {
+            height: 46px;
+            padding: 0 2rem;
+        }
+        
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .results-count {
+            font-size: 1.1rem;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination-info {
+            padding: 0.5rem 1rem;
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .no-results-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .no-results-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        /* Стили для карточки с информацией о владельце */
+        .wishlist-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .owner-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .owner-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .owner-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .owner-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.2rem;
+        }
+        
+        .owner-email {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .card-footer {
+            margin-top: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-btn {
+                width: 100%;
+            }
+            
+            .owner-badge {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <h1 class="page-title">🔍 Поиск публичных вишлистов</h1>
+        
+        <div class="search-section">
+            <h2 class="search-title">Фильтры поиска</h2>
+            <div class="search-form">
+                <div class="search-field">
+                    <label for="ownerName">Имя или email владельца</label>
+                    <input type="text" id="ownerName" placeholder="Введите имя или email...">
+                </div>
+                <div class="search-field">
+                    <label for="wishlistName">Название вишлиста</label>
+                    <input type="text" id="wishlistName" placeholder="Введите название...">
+                </div>
+                <button class="btn search-btn" onclick="searchWishlists()">
+                    <span>🔍</span> Найти
+                </button>
+            </div>
+        </div>
+        
+        <div class="results-info" id="resultsInfo" style="display: none;">
+            <span class="results-count" id="resultsCount">Найдено: 0</span>
+            <button class="btn btn-secondary btn-sm" onclick="clearSearch()">
+                <span>✕</span> Очистить
+            </button>
+        </div>
+        
+        <div id="wishlistsContainer" class="cards-grid">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Загрузка публичных вишлистов...</p>
+            </div>
+        </div>
+        
+        <div class="pagination" id="pagination" style="display: none;">
+            <button class="btn btn-secondary" onclick="changePage('prev')" id="prevPageBtn">
+                <span>←</span> Предыдущая
+            </button>
+            <span class="pagination-info" id="pageInfo">Страница 1 из 1</span>
+            <button class="btn btn-secondary" onclick="changePage('next')" id="nextPageBtn">
+                Следующая <span>→</span>
+            </button>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Состояние поиска
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalCount = 0;
+        let currentFilters = {
+            owner: '',
+            title: ''
+        };
+        
+        // Кэш для информации о пользователях
+        const userCache = new Map();
+        
+        // Проверяем авторизацию
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Browse wishlists page loaded');
+            
+            // Инициализируем Auth
+            if (typeof Auth !== 'undefined') {
+                await Auth.init();
+            }
+            
+            if (!Auth.requireAuth()) {
+                return;
+            }
+            
+            // Загружаем публичные вишлисты при старте
+            await loadPublicWishlists();
+        });
+
+        // Загрузка публичных вишлистов
+        async function loadPublicWishlists(page = 1) {
+            const container = document.getElementById('wishlistsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+            const pagination = document.getElementById('pagination');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            // Показываем загрузку
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">Загрузка...</p>
+                </div>
+            `;
+            
+            try {
+                // Получаем публичные вишлисты
+                const data = await API.getPublicWishlists({
+                    page: page,
+                    limit: 12
+                });
+                
+                console.log('Public wishlists loaded:', data);
+                
+                // Получаем все вишлисты
+                let allWishlists = data.wishlists || [];
+                
+                // Загружаем информацию о владельцах для всех вишлистов
+                const ownerPromises = allWishlists.map(w => getUserInfo(w.owner_id));
+                const owners = await Promise.all(ownerPromises);
+                
+                // Создаем мапу для быстрого доступа к информации о владельцах
+                const ownerMap = new Map();
+                allWishlists.forEach((wishlist, index) => {
+                    ownerMap.set(wishlist.owner_id, owners[index]);
+                });
+                
+                // Применяем фильтры (регистронезависимый поиск с частичным совпадением)
+                let filteredWishlists = [...allWishlists];
+                
+                if (currentFilters.owner) {
+                    const searchTerm = currentFilters.owner.toLowerCase().trim();
+                    filteredWishlists = filteredWishlists.filter(w => {
+                        const owner = ownerMap.get(w.owner_id);
+                        if (!owner) return false;
+                        
+                        const ownerName = (owner.name || '').toLowerCase();
+                        const ownerEmail = (owner.email || '').toLowerCase();
+                        
+                        // Поиск по имени (частичное совпадение)
+                        const nameMatch = ownerName.includes(searchTerm);
+                        // Поиск по email (частичное совпадение)
+                        const emailMatch = ownerEmail.includes(searchTerm);
+                        
+                        return nameMatch || emailMatch;
+                    });
+                }
+                
+                if (currentFilters.title) {
+                    const searchTerm = currentFilters.title.toLowerCase().trim();
+                    filteredWishlists = filteredWishlists.filter(w => 
+                        (w.title || '').toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                // Обновляем информацию о результатах
+                totalCount = filteredWishlists.length;
+                totalPages = Math.ceil(totalCount / 12) || 1;
+                currentPage = page;
+                
+                if (totalCount > 0) {
+                    resultsInfo.style.display = 'flex';
+                    resultsCount.textContent = `Найдено: ${totalCount}`;
+                    
+                    // Отображаем вишлисты с пагинацией
+                    const startIndex = (currentPage - 1) * 12;
+                    const endIndex = startIndex + 12;
+                    const pageWishlists = filteredWishlists.slice(startIndex, endIndex);
+                    
+                    displayWishlists(pageWishlists, ownerMap);
+                    
+                    // Обновляем пагинацию
+                    updatePagination();
+                } else {
+                    // Нет результатов
+                    resultsInfo.style.display = 'none';
+                    pagination.style.display = 'none';
+                    
+                    container.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-icon">🔍</div>
+                            <h3 class="no-results-title">Ничего не найдено</h3>
+                            <p class="no-results-description">
+                                Попробуйте изменить параметры поиска или очистить фильтры
+                            </p>
+                            <button class="btn" onclick="clearSearch()">
+                                Очистить поиск
+                            </button>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error loading public wishlists:', error);
+                
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Ошибка загрузки:</strong> ${error.message}
+                    </div>
+                `;
+                
+                resultsInfo.style.display = 'none';
+                pagination.style.display = 'none';
+                
+                // Если ошибка авторизации, перенаправляем на логин
+                if (error.message === 'Unauthorized') {
+                    window.location.href = '/login';
+                }
+            }
+        }
+        
+        // Получение информации о пользователе
+        async function getUserInfo(userId) {
+            // Проверяем кэш
+            if (userCache.has(userId)) {
+                return userCache.get(userId);
+            }
+            
+            try {
+                // Запрашиваем информацию о пользователе из API
+                const userInfo = await API.getUserInfo(userId);
+                userCache.set(userId, userInfo);
+                return userInfo;
+            } catch (error) {
+                console.error(`Error loading user info for ${userId}:`, error);
+                // Возвращаем заглушку в случае ошибки
+                const fallbackInfo = {
+                    user_id: userId,
+                    name: 'Пользователь',
+                    email: ''
+                };
+                userCache.set(userId, fallbackInfo);
+                return fallbackInfo;
+            }
+        }
+        
+        // Отображение вишлистов
+        function displayWishlists(wishlists, ownerMap) {
+            const container = document.getElementById('wishlistsContainer');
+            
+            if (!wishlists || wishlists.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">📭</div>
+                        <h3 class="no-results-title">Нет доступных вишлистов</h3>
+                        <p class="no-results-description">
+                            Попробуйте изменить параметры поиска
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="cards-grid">';
+            
+            wishlists.forEach(wishlist => {
+                const owner = ownerMap.get(wishlist.owner_id) || {
+                    name: 'Пользователь',
+                    email: ''
+                };
+                
+                const date = new Date(wishlist.created_at * 1000).toLocaleDateString('ru-RU');
+                
+                // Генерируем инициалы для аватара
+                const initials = owner.name ? owner.name.charAt(0).toUpperCase() : '?';
+                
+                html += `
+                    <div class="card wishlist-card" data-id="${wishlist.id}">
+                        <div class="card-header">
+                            <h3 class="card-title">${Components.escapeHtml(wishlist.title)}</h3>
+                            <span class="card-badge">🌐 Публичный</span>
+                        </div>
+                        <div class="card-content">
+                            ${Components.escapeHtml(wishlist.description || 'Нет описания')}
+                        </div>
+                        <div class="owner-badge">
+                            <div class="owner-avatar">${initials}</div>
+                            <div class="owner-info">
+                                <div class="owner-name">${Components.escapeHtml(owner.name || 'Пользователь')}</div>
+                                ${owner.email ? `<div class="owner-email">${Components.escapeHtml(owner.email)}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <span>📅 ${date}</span>
+                            </div>
+                            <a href="/wishlist_view/${wishlist.id}" class="btn btn-sm">Подробнее</a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Обновление пагинации
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        }
+        
+        // Функция поиска (регистронезависимая)
+        window.searchWishlists = function() {
+            const ownerName = document.getElementById('ownerName').value;
+            const wishlistName = document.getElementById('wishlistName').value;
+            
+            currentFilters = {
+                owner: ownerName,
+                title: wishlistName
+            };
+            
+            currentPage = 1;
+            loadPublicWishlists(1);
+        };
+        
+        // Очистка поиска
+        window.clearSearch = function() {
+            document.getElementById('ownerName').value = '';
+            document.getElementById('wishlistName').value = '';
+            
+            currentFilters = {
+                owner: '',
+                title: ''
+            };
+            
+            currentPage = 1;
+            loadPublicWishlists(1);
+        };
+        
+        // Смена страницы
+        window.changePage = function(direction) {
+            if (direction === 'prev' && currentPage > 1) {
+                loadPublicWishlists(currentPage - 1);
+            } else if (direction === 'next' && currentPage < totalPages) {
+                loadPublicWishlists(currentPage + 1);
+            }
+        };
+        
+        // Обработка Enter в полях поиска
+        document.getElementById('ownerName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchWishlists();
+            }
+        });
+        
+        document.getElementById('wishlistName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchWishlists();
+            }
+        });
+    </script>
+</body>
+</html>

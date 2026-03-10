@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр вишлиста - Wishlist App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .item-status-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+    .booked-by-details {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .booked-by-info {
+        background-color: rgba(221, 107, 32, 0.1);
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        color: var(--warning-color);
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .booked-by-me-label {
+        background-color: rgba(44, 122, 123, 0.1);
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        color: var(--primary-color);
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+    }
+        .item-status-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .booked-by-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .booked-by-info {
+            background-color: rgba(221, 107, 32, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            color: var(--warning-color);
+            font-size: 0.8rem;
+        }
+
+        .booked-by-me-label {
+            background-color: rgba(44, 122, 123, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        .owner-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .owner-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .owner-details {
+            flex: 1;
+        }
+        
+        .owner-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .owner-email {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .wishlist-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .booking-notice {
+            background-color: rgba(44, 122, 123, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .booking-notice-icon {
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .owner-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .wishlist-stats {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <div class="back-link" style="margin-bottom: 1.5rem;">
+            <a href="/browse_wishlists" class="btn btn-secondary">
+                <span>←</span> Назад к поиску
+            </a>
+        </div>
+        
+        <!-- Информация о владельце -->
+        <div id="ownerInfo" class="owner-info" style="display: none;">
+            <div class="owner-avatar" id="ownerAvatar">👤</div>
+            <div class="owner-details">
+                <div class="owner-name" id="ownerName">Загрузка...</div>
+                <div class="owner-email" id="ownerEmail"></div>
+            </div>
+        </div>
+        
+        <!-- Информация о вишлисте -->
+        <div id="wishlistInfo" class="page-header">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Загрузка информации о вишлисте...</p>
+            </div>
+        </div>
+        
+        <!-- Уведомление о бронировании -->
+        <div id="bookingNotice" class="booking-notice" style="display: none;">
+            <span class="booking-notice-icon">🎁</span>
+            <span id="bookingNoticeText">
+                Вы можете забронировать понравившиеся предметы. Владелец увидит, что вы планируете подарить.
+            </span>
+        </div>
+        
+        <!-- Статистика вишлиста -->
+        <div id="wishlistStats" class="wishlist-stats" style="display: none;">
+            <div class="stat-item">
+                <span>📦</span>
+                <span>Всего предметов: <span id="totalItems" class="stat-value">0</span></span>
+            </div>
+            <div class="stat-item">
+                <span>✅</span>
+                <span>Доступно: <span id="availableItems" class="stat-value">0</span></span>
+            </div>
+            <div class="stat-item">
+                <span>📌</span>
+                <span>Забронировано: <span id="bookedItems" class="stat-value">0</span></span>
+            </div>
+        </div>
+        
+        <h2 style="margin: 2rem 0;">Предметы</h2>
+        
+        <div id="itemsContainer" class="items-list">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Загрузка предметов...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно подтверждения бронирования -->
+    <div id="confirmBookingModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Подтверждение бронирования</h2>
+                <span class="close" onclick="hideModal('confirmBookingModal')">&times;</span>
+            </div>
+            <div style="text-align: center; padding: 1rem 0;">
+                <p style="margin-bottom: 2rem; color: var(--text-secondary);" id="confirmBookingText">
+                    Вы уверены, что хотите забронировать этот предмет?
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-secondary" onclick="hideModal('confirmBookingModal')">Отмена</button>
+                    <button class="btn btn-success" id="confirmBookingBtn">Забронировать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения снятия брони -->
+    <div id="confirmUnbookModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Снятие бронирования</h2>
+                <span class="close" onclick="hideModal('confirmUnbookModal')">&times;</span>
+            </div>
+            <div style="text-align: center; padding: 1rem 0;">
+                <p style="margin-bottom: 2rem; color: var(--text-secondary);" id="confirmUnbookText">
+                    Вы уверены, что хотите снять бронь с этого предмета?
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-secondary" onclick="hideModal('confirmUnbookModal')">Отмена</button>
+                    <button class="btn btn-warning" id="confirmUnbookBtn">Снять бронь</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Текущий просматриваемый вишлист
+        let currentWishlist = null;
+        let currentItems = [];
+        let selectedItemId = null;
+        
+        // Проверяем авторизацию
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Инициализируем Auth
+            if (typeof Auth !== 'undefined') {
+                await Auth.init();
+            }
+            
+            if (!Auth.requireAuth()) {
+                return;
+            }
+            
+            const wishlistId = window.location.pathname.split('/').pop();
+            
+            // Проверяем валидность ID (UUID формат)
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+            if (!uuidRegex.test(wishlistId)) {
+                window.location.href = '/browse_wishlists';
+                return;
+            }
+            
+            // Загружаем данные
+            await loadWishlistDetail(wishlistId);
+        });
+
+        // Загрузка информации о вишлисте
+        async function loadWishlistDetail(wishlistId) {
+            const wishlistInfo = document.getElementById('wishlistInfo');
+            const itemsContainer = document.getElementById('itemsContainer');
+            const ownerInfo = document.getElementById('ownerInfo');
+            const wishlistStats = document.getElementById('wishlistStats');
+            const bookingNotice = document.getElementById('bookingNotice');
+            
+            try {
+                // Загружаем вишлист
+                const wishlist = await API.getWishlist(wishlistId);
+                currentWishlist = wishlist;
+                
+                // Проверяем, что это не свой вишлист
+                if (wishlist.owner_id === Auth.currentUser?.id) {
+                    // Если это свой вишлист, перенаправляем на страницу редактирования
+                    window.location.href = `/my_wishlist/${wishlistId}`;
+                    return;
+                }
+                
+                // Загружаем информацию о владельце
+                let owner = null;
+                try {
+                    owner = await API.getUserInfo(wishlist.owner_id);
+                } catch (error) {
+                    console.error('Error loading owner info:', error);
+                }
+                
+                // Загружаем предметы
+                const itemsData = await API.getItems(wishlistId);
+                currentItems = itemsData.items || [];
+                
+                // Отображаем информацию
+                displayWishlistInfo(wishlist);
+                displayOwnerInfo(owner || wishlist);
+                displayItems(currentItems);
+                updateStats(currentItems);
+                
+                // Показываем уведомление о бронировании
+                bookingNotice.style.display = 'flex';
+                
+                // Показываем элементы
+                ownerInfo.style.display = 'flex';
+                wishlistStats.style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+                
+                wishlistInfo.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Ошибка загрузки:</strong> ${error.message}
+                    </div>
+                `;
+                
+                // Если ошибка авторизации, перенаправляем на логин
+                if (error.message === 'Unauthorized') {
+                    window.location.href = '/login';
+                }
+            }
+        }
+        
+        // Отображение информации о вишлисте
+        function displayWishlistInfo(wishlist) {
+            const wishlistInfo = document.getElementById('wishlistInfo');
+            
+            const date = new Date(wishlist.created_at * 1000).toLocaleDateString('ru-RU');
+            
+            wishlistInfo.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">${Components.escapeHtml(wishlist.title)}</h2>
+                        <span class="card-badge">🌐 Публичный</span>
+                    </div>
+                    <div class="card-content">
+                        ${Components.escapeHtml(wishlist.description || 'Нет описания')}
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <span>📅 Создан: ${date}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Отображение информации о владельце
+        function displayOwnerInfo(owner) {
+            const ownerNameEl = document.getElementById('ownerName');
+            const ownerEmailEl = document.getElementById('ownerEmail');
+            const ownerAvatarEl = document.getElementById('ownerAvatar');
+            
+            const name = owner.name || 
+                        (owner.email ? owner.email.split('@')[0] : 'Пользователь');
+            const email = owner.email || '';
+            
+            ownerNameEl.textContent = name;
+            ownerEmailEl.textContent = email;
+            
+            // Генерируем аватар на основе имени
+            const initials = name.charAt(0).toUpperCase();
+            ownerAvatarEl.textContent = initials;
+        }
+        
+        // Отображение предметов
+        async function displayItems(items) {
+            const itemsContainer = document.getElementById('itemsContainer');
+            
+            if (!items || items.length === 0) {
+                itemsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <h3 class="empty-state-title">В этом вишлисте пока нет предметов</h3>
+                        <p class="empty-state-description">
+                            Загляните позже, возможно владелец еще не добавил предметы
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Собираем ID всех пользователей, которые забронировали предметы
+            const bookedByUserIds = items
+                .filter(item => item.booked_by && item.booked_by !== Auth.currentUser?.id)
+                .map(item => item.booked_by);
+            
+            // Загружаем информацию о пользователях, которые забронировали предметы
+            const bookedByUsersMap = new Map();
+            if (bookedByUserIds.length > 0) {
+                const uniqueIds = [...new Set(bookedByUserIds)];
+                await Promise.all(uniqueIds.map(async (userId) => {
+                    try {
+                        const userInfo = await API.getUserInfo(userId);
+                        bookedByUsersMap.set(userId, userInfo);
+                    } catch (error) {
+                        console.error(`Error loading user info for ${userId}:`, error);
+                    }
+                }));
+            }
+            
+            let itemsHtml = '<div class="items-list">';
+            items.forEach(item => {
+                const bookedByUser = item.booked_by ? bookedByUsersMap.get(item.booked_by) : null;
+                itemsHtml += Components.createItemCard(item, false, Auth.currentUser?.id, bookedByUser);
+            });
+            itemsHtml += '</div>';
+            
+            itemsContainer.innerHTML = itemsHtml;
+        }
+                
+        // Обновление статистики
+        function updateStats(items) {
+            const totalItems = document.getElementById('totalItems');
+            const availableItems = document.getElementById('availableItems');
+            const bookedItems = document.getElementById('bookedItems');
+            
+            const total = items.length;
+            const booked = items.filter(item => item.booked_by).length;
+            const available = total - booked;
+            
+            totalItems.textContent = total;
+            availableItems.textContent = available;
+            bookedItems.textContent = booked;
+        }
+        
+        // Функции для бронирования
+        window.bookItem = function(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) return;
+            
+            selectedItemId = itemId;
+            
+            const confirmText = document.getElementById('confirmBookingText');
+            confirmText.textContent = `Вы уверены, что хотите забронировать "${item.name}"?`;
+            
+            showModal('confirmBookingModal');
+        };
+        
+        window.unbookItem = function(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) return;
+            
+            selectedItemId = itemId;
+            
+            const confirmText = document.getElementById('confirmUnbookText');
+            confirmText.textContent = `Вы уверены, что хотите снять бронь с "${item.name}"?`;
+            
+            showModal('confirmUnbookModal');
+        };
+        
+        // Подтверждение бронирования
+        document.getElementById('confirmBookingBtn').addEventListener('click', async function() {
+            if (!selectedItemId) return;
+            
+            try {
+                await API.bookItem(selectedItemId);
+                
+                hideModal('confirmBookingModal');
+                Components.showAlert('Предмет успешно забронирован!', 'success');
+                
+                // Перезагружаем данные
+                const wishlistId = window.location.pathname.split('/').pop();
+                await loadWishlistDetail(wishlistId);
+                
+            } catch (error) {
+                Components.showAlert(error.message || 'Ошибка бронирования', 'error');
+                hideModal('confirmBookingModal');
+            }
+        });
+        
+        // Подтверждение снятия брони
+        document.getElementById('confirmUnbookBtn').addEventListener('click', async function() {
+            if (!selectedItemId) return;
+            
+            try {
+                await API.unbookItem(selectedItemId);
+                
+                hideModal('confirmUnbookModal');
+                Components.showAlert('Бронь успешно снята', 'success');
+                
+                // Перезагружаем данные
+                const wishlistId = window.location.pathname.split('/').pop();
+                await loadWishlistDetail(wishlistId);
+                
+            } catch (error) {
+                Components.showAlert(error.message || 'Ошибка при снятии брони', 'error');
+                hideModal('confirmUnbookModal');
+            }
+        });
+        
+        // Вспомогательные функции для модальных окон
+        window.showModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'block';
+        };
+
+        window.hideModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none';
+        };
+
+        // Закрытие модальных окон по клику вне
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

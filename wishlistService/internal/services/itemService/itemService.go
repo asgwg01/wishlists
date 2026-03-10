@@ -391,7 +391,7 @@ func (s *ItemService) Unbook(ctx context.Context, itemID uuid.UUID, userID uuid.
 		return models.Item{}, types.ErrorAccessDenied
 	}
 
-	if err := item.Unbook(userID); err != nil {
+	if err := item.Unbook(userID, isSelf); err != nil {
 		if errors.Is(err, types.ErrorItemNotBooked) {
 			log.Error("Can not unbook not booked wishlist item")
 			return models.Item{}, types.ErrorItemAlreadyBooked

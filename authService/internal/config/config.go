@@ -24,17 +24,17 @@ type GRPCConfig struct {
 }
 
 type StorageConfig struct {
-	Host     string `yaml:"host" nv-required:"true" env:"AUTH_DB_HOST"`
+	Host     string `yaml:"host" env-required:"true" env:"AUTH_DB_HOST"`
 	Port     string `yaml:"port" env-default:"5432" env:"AUTH_DB_PORT"`
-	DBName   string `yaml:"db_name" nv-required:"true" env:"AUTH_DB_NAME"`
-	User     string `yaml:"user" nv-required:"true" env:"AUTH_DB_USER"`
-	Password string `yaml:"password" nv-required:"true" env:"AUTH_DB_PASSWORD"`
+	DBName   string `yaml:"db_name" env-required:"true" env:"AUTH_DB_NAME"`
+	User     string `yaml:"user" env-required:"true" env:"AUTH_DB_USER"`
+	Password string `yaml:"password" env-required:"true" env:"AUTH_DB_PASSWORD"`
 }
 
 type RedisConfig struct {
-	Host     string `yaml:"host" nv-required:"true" env:"REDIS_HOST"`
+	Host     string `yaml:"host" env-required:"true" env:"REDIS_HOST"`
 	Port     string `yaml:"port" env-default:"6379" env:"REDIS_PORT"`
-	Password string `yaml:"password" nv-required:"true" env:"REDIS_PASSWORD"`
+	Password string `yaml:"password" env-required:"true" env:"REDIS_PASSWORD"`
 }
 
 type JWTConfig struct {

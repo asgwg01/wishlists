@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои вишлисты - Wishlist App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .page-header {
+            animation: slideDown 0.5s ease;
+        }
+        .cards-grid {
+            animation: fadeIn 0.8s ease 0.2s backwards;
+        }
+        .card {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">📋 Мои вишлисты</h1>
+            <button class="btn" onclick="showCreateWishlistModal()" style="animation: pulse 2s infinite;">
+                ➕ Создать вишлист
+            </button>
+        </div>
+        
+        <div id="wishlistsContainer" class="cards-grid">
+            <div class="loading-container">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно создания вишлиста -->
+    <div id="createWishlistModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Создать новый вишлист</h2>
+                <span class="close" onclick="hideModal('createWishlistModal')">&times;</span>
+            </div>
+            <form id="createWishlistForm">
+                <div class="form-group">
+                    <label for="title">Название *</label>
+                    <input type="text" id="title" required 
+                           maxlength="80" placeholder="Например: Мой день рождения 2024">
+                </div>
+                <div class="form-group">
+                    <label for="description">Описание</label>
+                    <textarea id="description" maxlength="1000"
+                              placeholder="Опишите повод, дату или другие детали..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isPublic">
+                        🌐 Публичный вишлист (доступен всем)
+                    </label>
+                </div>
+                <button type="submit" class="btn">✅ Создать</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('My wishlists page loaded');
+            
+            if (typeof Auth !== 'undefined') {
+                // Инициализируем Auth и ждем завершения
+                await Auth.init();
+                console.log('Auth initialized, currentUser:', Auth.currentUser);
+                
+                // Проверяем наличие токена в localStorage
+                const token = localStorage.getItem('token');
+                console.log('Token in localStorage:', token ? 'present' : 'missing');
+                
+                // Проверяем куки
+                console.log('Cookies:', document.cookie);
+                
+                // Если есть токен, но нет currentUser, пробуем восстановить сессию
+                if (token && !Auth.currentUser) {
+                    console.log('Token present but no user, trying to restore session');
+                    try {
+                        const userData = await API.getCurrentUser();
+                        Auth.currentUser = {
+                            id: userData.user_id,
+                            email: userData.email,
+                            name: userData.name
+                        };
+                        Auth.updateNavigation();
+                        console.log('Session restored:', Auth.currentUser);
+                    } catch (error) {
+                        console.error('Failed to restore session:', error);
+                        localStorage.removeItem('token');
+                        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                    }
+                }
+            }
+            
+            if (typeof loadFooter !== 'undefined') {
+                loadFooter();
+            }
+            
+            // Проверяем авторизацию
+            if (typeof Auth !== 'undefined') {
+                // Даем время на загрузку
+                setTimeout(() => {
+                    if (!Auth.currentUser) {
+                        console.log('User not authenticated after check, redirecting to login');
+                        window.location.href = '/login';
+                        return;
+                    }
+                    console.log('User authenticated:', Auth.currentUser);
+                    loadWishlists();
+                }, 100); // Небольшая задержка для гарантии
+            } else {
+                console.error('Auth module not loaded');
+                window.location.href = '/login';
+            }
+        });
+
+        window.showCreateWishlistModal = function() {
+            const modal = document.getElementById('createWishlistModal');
+            if (modal) modal.style.display = 'block';
+        };
+
+        window.hideModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none';
+        };
+
+        async function loadWishlists() {
+            const container = document.getElementById('wishlistsContainer');
+            if (!container) return;
+            
+            if (typeof Components !== 'undefined') {
+                Components.showLoading(container);
+            }
+            
+            try {
+                console.log('Loading wishlists for user:', Auth.currentUser.id);
+                
+                // Получаем вишлисты текущего пользователя
+                const data = await API.getUserWishlists(Auth.currentUser.id);
+                console.log('Wishlists data:', data);
+                
+                if (!data.wishlists || data.wishlists.length === 0) {
+                    if (typeof Components !== 'undefined') {
+                        Components.showEmptyState(
+                            container,
+                            'У вас пока нет вишлистов',
+                            'Создайте свой первый вишлист и начните собирать подарки!',
+                            '📭',
+                            'showCreateWishlistModal()'
+                        );
+                    }
+                    return;
+                }
+                
+                if (typeof Components !== 'undefined') {
+                    container.innerHTML = data.wishlists.map(w => 
+                        Components.createWishlistCard(w, true)
+                    ).join('');
+                }
+            } catch (error) {
+                console.error('Error loading wishlists:', error);
+                
+                // Если ошибка авторизации, перенаправляем на логин
+                if (error.message === 'Unauthorized' || error.message.includes('401')) {
+                    console.log('Unauthorized error, redirecting to login');
+                    window.location.href = '/login';
+                } else {
+                    container.innerHTML = '<div class="alert alert-error">Ошибка загрузки вишлистов</div>';
+                }
+            }
+        }
+
+        document.getElementById('createWishlistForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const isPublic = document.getElementById('isPublic').checked;
+            
+            try {
+                await API.createWishlist({
+                    title,
+                    description: description || '',
+                    is_public: isPublic
+                });
+                
+                hideModal('createWishlistModal');
+                document.getElementById('createWishlistForm').reset();
+                
+                if (typeof Components !== 'undefined') {
+                    Components.showAlert('Вишлист успешно создан!', 'success');
+                }
+                
+                loadWishlists();
+            } catch (error) {
+                console.error('Error creating wishlist:', error);
+                if (typeof Components !== 'undefined') {
+                    Components.showAlert(error.message || 'Ошибка создания вишлиста', 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

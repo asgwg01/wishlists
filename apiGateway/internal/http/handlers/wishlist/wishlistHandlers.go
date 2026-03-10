@@ -565,7 +565,7 @@ func (h *WishlistHandlers) AddItem(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {object}  handlers.ErrorDTO     "Внутренняя ошибка сервера"
 // @Router       /wishlists/{wishlist_id}/items [get]
 func (h *WishlistHandlers) ListItems(w http.ResponseWriter, r *http.Request) {
-	const logPrefix = "handlers.wishlist.AddItem"
+	const logPrefix = "handlers.wishlist.ListItems"
 	log := h.log.With(
 		slog.String("where", logPrefix),
 		slog.String("trace_id", trace.GetTraceID(r.Context())),

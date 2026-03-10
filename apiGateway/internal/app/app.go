@@ -66,6 +66,7 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	authRouter.HandleFunc("/register", authHandlers.Register).Methods("POST")
 	authRouter.HandleFunc("/login", authHandlers.Login).Methods("POST")
 	authRouter.HandleFunc("/self", authHandlers.GetCurrentUser).Methods("GET")
+	authRouter.HandleFunc("/user/{user_id}", authHandlers.GetUserInfo).Methods("GET")
 
 	//вишлисты
 	wishlistHandlers := wishlist.NewHandlers(log, wishlistServiceClient)

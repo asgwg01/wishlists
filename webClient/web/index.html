@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist App - Главная</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Дополнительные стили для главной */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            animation: fadeIn 1s ease;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            animation: slideDown 0.8s ease;
+        }
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            animation: slideUp 0.8s ease 0.2s backwards;
+        }
+        .cards-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            animation: fadeIn 1s ease 0.4s backwards;
+        }
+        .card {
+            transition: var(--transition-bounce);
+        }
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <section class="hero">
+            <h1>Wishlist App</h1>
+            <p>Создавайте вишлисты, делитесь с друзьями и получайте желанные подарки</p>
+            
+            <div class="cards-grid">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                    <h3 style="margin-bottom: 1rem;">Мои вишлисты</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Управляйте своими вишлистами, добавляйте и редактируйте предметы
+                    </p>
+                    <a href="/my_wishlists" class="btn">Перейти</a>
+                </div>
+                
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <h3 style="margin-bottom: 1rem;">Найти вишлисты</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Ищите публичные вишлисты других пользователей и бронируйте подарки
+                    </p>
+                    <a href="/browse_wishlists" class="btn">Поиск</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Auth !== 'undefined') {
+                Auth.init();
+            }
+            if (typeof loadFooter !== 'undefined') {
+                loadFooter();
+            }
+        });
+    </script>
+</body>
+</html>
